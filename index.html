@@ -274,8 +274,8 @@ function renderProjects(){
 }
 
 function openModal(i){
-  currentProject=projects[i];
-  const p=currentProject;
+  const p=projects[i];
+  currentProject=p;
 
   document.body.classList.add("modal-open");
   document.getElementById("modal").classList.add("active");
@@ -284,9 +284,25 @@ function openModal(i){
     <h2>${p.name}</h2>
     <p style="color:var(--muted)">📍 ${p.location} • 💰 ${p.price}</p>
 
+    <p>${p.description || ""}</p>
+
+    ${p.nearby?.length ? `
+      <h4>Lokasi Terdekat</h4>
+      <ul>${p.nearby.map(n=>`<li>${n}</li>`).join("")}</ul>
+    ` : ""}
+
     <div class="cta-group">
       <a class="btn" onclick="showGallery()">Lihat Foto</a>
       <a class="btn" onclick="showVideo()">Lihat Video</a>
+    </div>
+
+    <!-- TETAP ADA (TIDAK DIHAPUS) -->
+    <div class="gallery" id="gallery">
+      ${(p.images||[]).map(img=>`<img data-src="${img}">`).join("")}
+    </div>
+
+    <div class="video-box" id="videoBox">
+      ${p.video ? `<video src="${p.video}" controls playsinline></video>` : ""}
     </div>
 
     <div class="cta-group">
@@ -295,39 +311,57 @@ function openModal(i){
     </div>
   `;
 
+  lazyLoadGallery();
   initSwipe();
 }
 
-/* TETAP ADA, TAPI DIALIHKAN */
-function showGallery(){ openMedia("image") }
-function showVideo(){ openMedia("video") }
+/* =========================
+   🔥 OVERRIDE PERILAKU
+   ========================= */
+function showGallery(){
+  openMedia("photo");
+}
 
-/* MEDIA POPUP */
+function showVideo(){
+  openMedia("video");
+}
+
+/* =========================
+   🖼️ MEDIA POPUP IOS STYLE
+   ========================= */
 function openMedia(type){
+  const popup=document.getElementById("mediaPopup");
   const grid=document.getElementById("mediaGrid");
   const title=document.getElementById("mediaTitle");
+
   grid.innerHTML="";
 
-  if(type==="image"){
-    title.textContent="Foto Project";
+  if(type==="photo"){
+    title.innerText="Foto Project";
     (currentProject.images||[]).forEach(img=>{
       grid.innerHTML+=`<img src="${img}">`;
     });
-  }else{
-    title.textContent="Video Project";
+  }
+
+  if(type==="video"){
+    title.innerText="Video Project";
     (currentProject.videos||[]).forEach(v=>{
-      grid.innerHTML+=`<video src="${v}" controls playsinline></video>`;
+      grid.innerHTML+=`
+        <video src="${v}" controls playsinline></video>
+      `;
     });
   }
 
-  document.getElementById("mediaPopup").classList.add("active");
+  popup.classList.add("active");
 }
 
 function closeMedia(){
   document.getElementById("mediaPopup").classList.remove("active");
 }
 
-/* MODAL CLOSE + SWIPE */
+/* =========================
+   MODAL CLOSE
+   ========================= */
 function closeModal(){
   const sheet=document.querySelector(".sheet");
   sheet.style.transform="translate(-50%,100%)";
@@ -338,31 +372,42 @@ function closeModal(){
   },350);
 }
 
+/* 🔒 SWIPE TIDAK SENSITIF */
 function initSwipe(){
   const sheet=document.querySelector(".sheet");
   const body=document.querySelector(".sheet-body");
-  let startY=0,currentY=0,drag=false;
+  let startY=0,currentY=0,dragging=false;
 
   sheet.addEventListener("touchstart",e=>{
     if(body.scrollTop===0){
       startY=e.touches[0].clientY;
-      drag=true;
+      dragging=true;
       sheet.style.transition="none";
     }
   });
 
   sheet.addEventListener("touchmove",e=>{
-    if(!drag) return;
+    if(!dragging) return;
     currentY=e.touches[0].clientY;
     const diff=currentY-startY;
-    if(diff>0) sheet.style.transform=`translate(-50%,${diff*0.6}px)`;
+    if(diff>0){
+      sheet.style.transform=`translate(-50%,${diff*0.6}px)`;
+    }
   });
 
   sheet.addEventListener("touchend",()=>{
-    if(!drag) return;
-    drag=false;
+    if(!dragging) return;
+    dragging=false;
     sheet.style.transition="transform .45s cubic-bezier(.22,.61,.36,1)";
-    (currentY-startY)>180 ? closeModal() : sheet.style.transform="translate(-50%,0)";
+    const diff=currentY-startY;
+    diff>180 ? closeModal() : sheet.style.transform="translate(-50%,0)";
+  });
+}
+
+function lazyLoadGallery(){
+  document.querySelectorAll(".gallery img").forEach(img=>{
+    img.src=img.dataset.src;
+    img.onload=()=>img.classList.add("loaded");
   });
 }
 
