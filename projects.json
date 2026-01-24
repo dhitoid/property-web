@@ -5,18 +5,14 @@
     "price": "Mulai 3 Jutaan",
 
     "description": "Grand Pakis Residence adalah perumahan modern satu lantai dengan konsep nyaman, aman, dan akses strategis. Cocok untuk keluarga muda maupun investasi jangka panjang.",
-
-    "images": [
-      "assets/gpr/brosur.JPEG",
-      "assets/gpr/spekgpr.JPEG",
-      "assets/gpr/gpr1.WEBP",
-      "assets/gpr/gpr2.WEBP",
-      "assets/gpr/gpr3.WEBP",
-      "assets/gpr/gpr4.WEBP"
-    ],
-
-    "videos": [
-      "assets/preview-pakis.mp4"
+    "folder": "assets/gpr/",
+    "media": [
+      "brosur.JPEG",
+      "spekgpr.JPEG",
+      "gpr1.WEBP",
+      "gpr2.WEBP",
+      "gpr3.WEBP",
+      "gpr4.WEBP"
     ],
 
     "nearby": [
@@ -35,15 +31,14 @@
     "price": "Mulai 3 Jutaan",
 
     "description": "Grand Duta Pakis menghadirkan hunian minimalis modern dengan lingkungan tenang dan sistem keamanan one gate. Proses KPR mudah dan legalitas aman.",
-
-    "images": [
-      "assets/rumah1.jpg",
-      "assets/rumah1b.jpg",
-      "assets/rumah1c.jpg"
-    ],
-
-    "videos": [
-      "assets/preview-duta.mp4"
+    "folder": "assets/gpr/",
+    "media": [
+      "brosur.JPEG",
+      "spekgpr.JPEG",
+      "gpr1.WEBP",
+      "gpr2.WEBP",
+      "gpr3.WEBP",
+      "gpr4.WEBP"
     ],
 
     "nearby": [
