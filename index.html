@@ -699,6 +699,14 @@ let fsIndex=0;
 let fsItems=[];
 let dotsTimer=null;
 
+const fullscreenEl = document.getElementById("fullscreen");
+
+fullscreenEl.addEventListener("click",(e)=>{
+  if(e.target.closest(".fs-close")) return;
+  showDots();
+});
+
+
 function showDots(){
   const dots=document.getElementById("fsDots");
   dots.classList.add("show");
@@ -749,21 +757,19 @@ function openFullscreen(type,start=0){
   track.style.transform=`translateX(-${fsIndex*100}%)`;
   fs.classList.add("active");
 
-  const fullscreenEl = document.getElementById("fullscreen");
-
-fullscreenEl.onclick = (e)=>{
-  if(e.target.closest(".fs-close")) return; // ⛔ jangan ganggu close
-  showDots();
-};
-
   initFullscreenSwipe(type);
   setTimeout(hideSplash,300);
 }
 
 function closeFullscreen(e){
-  e?.stopPropagation();
+  if(e){
+    e.preventDefault();
+    e.stopImmediatePropagation(); // 🔥 ini kuncinya
+  }
   document.querySelectorAll(".fs-item video").forEach(v=>v.pause());
-  document.getElementById("fullscreen").classList.remove("active");
+  const fs=document.getElementById("fullscreen");
+  fs.classList.remove("active");
+  document.getElementById("fsTrack").style.transform="";
 }
 
 function updateDots(){
