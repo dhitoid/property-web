@@ -658,21 +658,24 @@ if(type==="video"){
 function closeMedia(e){
   if(e){
     e.preventDefault();
-    e.stopImmediatePropagation(); // 🔥 WAJIB
+    e.stopPropagation();
   }
 
-  const popup=document.getElementById("mediaPopup");
-  const grid=document.getElementById("mediaGrid");
+  const popup = document.getElementById("mediaPopup");
+  const grid  = document.getElementById("mediaGrid");
 
-  grid.innerHTML="";
   popup.classList.remove("active");
+
+  // tunggu animasi blur kelar
+  setTimeout(()=>{
+    grid.innerHTML="";
+  },200);
 }
 
-document.getElementById("mediaPopup").addEventListener("click",e=>{
-  if(e.target.id==="mediaPopup"){
-    closeMedia();
-  }
+document.querySelector(".media-sheet").addEventListener("click",e=>{
+  e.stopPropagation();
 });
+
 
 /* =========================
    MODAL CLOSE
