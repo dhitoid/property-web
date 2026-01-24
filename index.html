@@ -244,31 +244,47 @@ function renderProjects(){
 }
 
 function openModal(i){
-  const p=projects[i];
+  const p = projects[i];
+
+  // 🔥 AKTIFKAN MODAL DULU (INI PENTING)
   document.body.classList.add("modal-open");
+  document.getElementById("modal").classList.add("active");
 
-  document.getElementById("modalBody").innerHTML=`
+  // ✅ AMANKAN DATA
+  const images = Array.isArray(p.images) ? p.images : [];
+  const nearby = Array.isArray(p.nearby) ? p.nearby : [];
+  const description = p.description || "Informasi lengkap tersedia, silakan hubungi kami.";
+
+  // 🔥 RENDER KONTEN
+  document.getElementById("modalBody").innerHTML = `
+    ${images.length ? `
     <div class="gallery">
-      ${p.images.map(img=>`<img data-src="${img}">`).join("")}
-    </div>
+      ${images.map(img=>`<img data-src="${img}">`).join("")}
+    </div>` : ""}
 
-    <h2>${p.name}</h2>
-    <p style="color:var(--muted)">📍 ${p.location} • 💰 ${p.price}</p>
+    <h2>${p.name || "-"}</h2>
+    <p style="color:var(--muted)">
+      📍 ${p.location || "-"} • 💰 ${p.price || "-"}
+    </p>
 
-    <p>${p.description}</p>
+    <p>${description}</p>
 
+    ${nearby.length ? `
     <h4>Lokasi Terdekat</h4>
-    <ul>${p.nearby.map(n=>`<li>${n}</li>`).join("")}</ul>
+    <ul>
+      ${nearby.map(n=>`<li>${n}</li>`).join("")}
+    </ul>` : ""}
 
-    <video src="${p.video}" controls playsinline></video>
+    ${p.video ? `
+    <video src="${p.video}" controls playsinline></video>` : ""}
 
     <div class="cta-group">
-      <a href="${p.mapLink}" target="_blank" class="btn">Google Maps</a>
+      ${p.mapLink ? `<a href="${p.mapLink}" target="_blank" class="btn">Google Maps</a>` : ""}
       <a href="${generateWA(p.name)}" target="_blank" class="btn primary">Tanya Unit</a>
     </div>
   `;
 
-  document.getElementById("modal").classList.add("active");
+  // 🔥 BARU INIT FITUR
   lazyLoadGallery();
   initSwipe();
 }
