@@ -1,10 +1,15 @@
 [
   {
     "name": "Grand Pakis Residence",
-    "image": "assets/rumah1.jpg",
+    "images": [
+      "assets/rumah1.jpg",
+      "assets/rumah1b.jpg",
+      "assets/rumah1c.jpg"
+    ],
     "location": "Pamulang",
     "price": "Mulai 3 Jutaan",
-    "map": "https://www.google.com/maps?q=Pamulang&output=embed",
+    "mapEmbed": "https://www.google.com/maps?q=Pamulang&output=embed",
+    "mapLink": "https://maps.google.com/?q=Pamulang",
     "specs": [
       "Type 36",
       "Luas Tanah 72–125 m²",
@@ -18,22 +23,28 @@
       "Booking ringan & all in"
     ]
   },
-  {
+    {
     "name": "Grand Duta Pakis",
-    "image": "assets/rumah2.jpg",
-    "location": "Setu",
-    "price": "Mulai 3,5 Jutaan",
-    "map": "https://www.google.com/maps?q=Pamulang&output=embed",
+    "images": [
+      "assets/rumah1.jpg",
+      "assets/rumah1b.jpg",
+      "assets/rumah1c.jpg"
+    ],
+    "location": "Pamulang",
+    "price": "Mulai 3 Jutaan",
+    "mapEmbed": "https://www.google.com/maps?q=Pamulang&output=embed",
+    "mapLink": "https://maps.google.com/?q=Pamulang",
     "specs": [
       "Type 36",
-      "Luas Tanah hingga 120 m²",
+      "Luas Tanah 72–125 m²",
       "2 Kamar Tidur",
-      "1 Kamar Mandi"
+      "1 Kamar Mandi",
+      "Carport"
     ],
     "advantages": [
-      "Dekat RS Hermina",
-      "Akses jalan lebar",
-      "Lingkungan nyaman"
+      "One Gate System",
+      "Dekat Pamulang & Puspitek",
+      "Booking ringan & all in"
     ]
   }
 ]
