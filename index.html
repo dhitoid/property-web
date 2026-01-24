@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dhito Property</title>
+<title>Nour Maandhito | Marketing Property</title>
 
 <style>
 :root{
@@ -46,7 +46,7 @@ nav a{color:var(--muted);margin-left:18px;text-decoration:none}
   align-items:center;
   text-align:center;
 }
-.hero h1{font-size:42px}
+.hero h1{font-size:44px}
 .hero p{color:var(--muted);max-width:620px}
 
 /* BUTTON */
@@ -83,12 +83,11 @@ section{padding:90px 6%}
 /* CONTACT */
 .social-grid{
   display:flex;
-  gap:18px;
-  flex-wrap:wrap;
+  gap:16px;
 }
 .social-grid a{
-  width:48px;
-  height:48px;
+  width:42px;
+  height:42px;
   border-radius:50%;
   background:var(--card);
   display:flex;
@@ -96,7 +95,7 @@ section{padding:90px 6%}
   justify-content:center;
 }
 .social-grid img{
-  width:22px;
+  width:20px;
   filter:invert(1);
 }
 
@@ -136,7 +135,8 @@ section{padding:90px 6%}
   padding:0 24px 40px;
 }
 
-.gallery, .video-box{display:none;margin-bottom:20px}
+/* MEDIA */
+.gallery, .video-box{display:none;margin-top:20px}
 .gallery img{
   width:100%;
   height:220px;
@@ -144,11 +144,7 @@ section{padding:90px 6%}
   border-radius:18px;
   margin-bottom:12px;
 }
-
-video{
-  width:100%;
-  border-radius:18px;
-}
+video{width:100%;border-radius:18px}
 
 /* CTA */
 .cta-group{display:flex;gap:12px;flex-wrap:wrap}
@@ -187,7 +183,7 @@ video{
 </nav>
 
 <section class="hero">
-  <h1>Marketing Property Profesional</h1>
+  <h1>Marketing Property Profesional & Terpercaya</h1>
   <p>Membantu Anda mendapatkan rumah impian dengan proses aman.</p>
   <a href="#project" class="btn primary">Lihat Project</a>
 </section>
@@ -207,6 +203,8 @@ video{
   </div>
 </section>
 
+<footer>© 2026 Nour Maandhito — Marketing Property</footer>
+
 <!-- MODAL -->
 <div id="modal" class="modal">
   <div class="sheet">
@@ -222,6 +220,7 @@ video{
 
 <script>
 let projects=[];
+let currentProject=null;
 
 fetch("projects.json")
 .then(r=>r.json())
@@ -243,54 +242,55 @@ function renderProjects(){
 }
 
 function openModal(i){
-  const p=projects[i];
+  currentProject=projects[i];
   document.body.classList.add("modal-open");
 
-  document.getElementById("modalBody").innerHTML=`
-    <h2>${p.name}</h2>
-    <p style="color:var(--muted)">📍 ${p.location}</p>
+  modalBody.innerHTML=`
+    <h2>${currentProject.name}</h2>
+    <p style="color:var(--muted)">📍 ${currentProject.location}</p>
 
     <div class="cta-group">
       <a class="btn" onclick="showGallery()">Lihat Foto</a>
       <a class="btn" onclick="showVideo()">Lihat Video</a>
     </div>
 
-    <div class="gallery" id="gallery">
-      ${p.images.map(img=>`<img src="${img}">`).join("")}
+    <div id="gallery" class="gallery">
+      ${currentProject.images.map(img=>`<img src="${img}">`).join("")}
     </div>
 
-    <div class="video-box" id="videoBox">
-      <video src="${p.video}" controls playsinline></video>
+    <div id="videoBox" class="video-box">
+      <video src="${currentProject.video}" controls playsinline></video>
     </div>
 
-    <div class="cta-group">
-      <a href="${p.mapLink}" target="_blank" class="btn">Google Maps</a>
-      <a href="${waLink(p.name)}" target="_blank" class="btn primary">Tanya Unit</a>
+    <div class="cta-group" style="margin-top:20px">
+      <a href="${currentProject.mapLink}" target="_blank" class="btn">Google Maps</a>
+      <a href="${waLink(currentProject.name)}" target="_blank" class="btn primary">Tanya Unit</a>
     </div>
   `;
 
-  document.getElementById("modal").classList.add("active");
-  document.getElementById("floatingWA").href=waLink(p.name);
+  modal.classList.add("active");
+  floatingWA.href=waLink(currentProject.name);
 }
 
 function showGallery(){
-  document.getElementById("gallery").style.display="block";
-  document.getElementById("videoBox").style.display="none";
+  gallery.style.display="block";
+  videoBox.style.display="none";
 }
 
 function showVideo(){
-  document.getElementById("videoBox").style.display="block";
-  document.getElementById("gallery").style.display="none";
+  videoBox.style.display="block";
+  gallery.style.display="none";
 }
 
 function waLink(name){
-  const msg=`Halo, saya telah melihat website Dhito Property dan tertarik dengan project ${name}.`;
-  return `https://wa.me/6281802168184?text=${encodeURIComponent(msg)}`;
+  return `https://wa.me/6281802168184?text=${encodeURIComponent(
+    `Halo, saya telah melihat website Dhito Property dan tertarik dengan project ${name}.`
+  )}`;
 }
 
-document.getElementById("modal").onclick=e=>{
+modal.onclick=e=>{
   if(e.target.id==="modal"){
-    document.getElementById("modal").classList.remove("active");
+    modal.classList.remove("active");
     document.body.classList.remove("modal-open");
   }
 }
