@@ -226,6 +226,43 @@ ul{
   text-align:center;
 }
 
+/* SOCIAL CONTACT */
+.social-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:18px;
+  margin-top:30px;
+}
+
+.social-card{
+  background:var(--card);
+  border-radius:22px;
+  padding:20px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:12px;
+  color:white;
+  text-decoration:none;
+  transition:.3s;
+}
+
+.social-card:hover{
+  background:rgba(255,255,255,.16);
+  transform:translateY(-4px);
+}
+
+.social-card img{
+  width:28px;
+  height:28px;
+  filter:invert(1);
+}
+
+.social-card span{
+  font-size:14px;
+  color:var(--muted);
+}
+
 @media(max-width:600px){
   .hero h1{font-size:32px}
   .cta-group{flex-direction:column}
@@ -259,11 +296,29 @@ ul{
 </section>
 
 <section id="contact">
-  <h2>Kontak</h2>
-  <p style="color:var(--muted)">
-    📱 WhatsApp: 081802168184<br>
-    📷 Instagram: @dhitoproperty.id
-  </p>
+  <h2>Hubungi Saya</h2>
+
+  <div class="social-grid">
+    <a href="https://wa.me/6281802168184" target="_blank" class="social-card">
+      <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/whatsapp.svg">
+      <span>WhatsApp</span>
+    </a>
+
+    <a href="https://instagram.com/dhitoproperty.id" target="_blank" class="social-card">
+      <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/instagram.svg">
+      <span>Instagram</span>
+    </a>
+
+    <a href="https://www.tiktok.com/@dhitoproperty.id" target="_blank" class="social-card">
+      <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/tiktok.svg">
+      <span>TikTok</span>
+    </a>
+
+    <a href="mailto:dhitoproperty@gmail.com" class="social-card">
+      <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/gmail.svg">
+      <span>Email</span>
+    </a>
+  </div>
 </section>
 
 <footer>© 2026 Nour Maandhito — Marketing Property</footer>
@@ -335,7 +390,7 @@ function openModal(i){
 
       <div class="cta-group">
         <a href="${p.mapLink}" target="_blank" class="btn">Google Maps</a>
-        <a href="https://wa.me/6281802168184" class="btn primary">Tanya Unit</a>
+        <a href="${generateWA(p.name)}" target="_blank" class="btn primary">Tanya Unit</a>
       </div>
     </div>
   `;
@@ -394,6 +449,16 @@ function initSwipe(){
     else sheet.style.transform="translate(-50%,0)";
   });
 }
+
+function generateWA(projectName){
+  const phone = "6281802168184";
+  const message = `
+Halo, saya telah melihat website Dhito Property.
+Saya tertarik ingin tanya-tanya lebih lanjut mengenai rumah di ${projectName}.
+  `;
+  return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+}
+
 </script>
 
 </body>
