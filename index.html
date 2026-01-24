@@ -645,32 +645,33 @@ function enableZoom(img){
    🖼️ MEDIA POPUP IOS STYLE
    ========================= */
 function openMedia(type){
-  const popup=document.getElementById("mediaPopup");
-  const grid=document.getElementById("mediaGrid");
-  const title=document.getElementById("mediaTitle");
+  const popup = document.getElementById("mediaPopup");
+  const grid  = document.getElementById("mediaGrid");
+  const title = document.getElementById("mediaTitle");
 
   grid.innerHTML="";
+  title.innerText = type==="photo" ? "Foto Project" : "Video Project";
 
-  if(type==="photo"){
-  title.innerText="Foto Project";
-  (currentProject.images||[]).forEach((img,i)=>{
-    const el=document.createElement("img");
-    el.src=img;
-    el.onclick=()=>openFullscreen("photo",i);
+  const files = (currentProject.media || [])
+    .filter(f => type==="photo" ? isImage(f) : isVideo(f));
+
+  files.forEach((file,i)=>{
+    const fullPath = currentProject.folder + file;
+    let el;
+
+    if(type==="photo"){
+      el = document.createElement("img");
+      el.src = fullPath;
+    }else{
+      el = document.createElement("video");
+      el.src = fullPath;
+      el.muted = true;
+      el.playsInline = true;
+    }
+
+    el.onclick = ()=>openFullscreen(type, i, files);
     grid.appendChild(el);
   });
-}
-
-if(type==="video"){
-  title.innerText="Video Project";
-  (currentProject.videos||[]).forEach((v,i)=>{
-    const el=document.createElement("video");
-    el.src=v;
-    el.muted=true;
-    el.onclick=()=>openFullscreen("video",i);
-    grid.appendChild(el);
-  });
-}
 
   popup.classList.add("active");
 }
@@ -767,7 +768,11 @@ fullscreenEl.addEventListener("click",(e)=>{
   showDots();
 });
 
+const IMAGE_EXT = /\.(jpg|jpeg|png|webp|gif)$/i;
+const VIDEO_EXT = /\.(mp4|webm|ogg|mov)$/i;
 
+function isImage(src){ return IMAGE_EXT.test(src); }
+function isVideo(src){ return VIDEO_EXT.test(src); }
 
 function showDots(){
   const dots=document.getElementById("fsDots");
@@ -779,33 +784,34 @@ function showDots(){
   },1800);
 }
 
-function openFullscreen(type,start=0){
+function openFullscreen(type,start,files){
   showSplash();
 
-  const fs=document.getElementById("fullscreen");
-  const track=document.getElementById("fsTrack");
-  const dots=document.getElementById("fsDots");
+  const fs    = document.getElementById("fullscreen");
+  const track = document.getElementById("fsTrack");
+  const dots  = document.getElementById("fsDots");
 
   track.innerHTML="";
   dots.innerHTML="";
 
-  fsItems = type==="photo" ? currentProject.images : currentProject.videos;
-  fsIndex=start;
+  fsItems = files;
+  fsIndex = start;
 
-  fsItems.forEach((src,i)=>{
-    const wrap=document.createElement("div");
+  files.forEach((file,i)=>{
+    const wrap = document.createElement("div");
     wrap.className="fs-item";
+    const src = currentProject.folder + file;
 
     if(type==="photo"){
-      const img=document.createElement("img");
-      img.src=src;
+      const img = document.createElement("img");
+      img.src = src;
       enableZoom(img);
       wrap.appendChild(img);
     }else{
-      const v=document.createElement("video");
-      v.src=src;
-      v.controls=true;
-      v.playsInline=true;
+      const v = document.createElement("video");
+      v.src = src;
+      v.controls = true;
+      v.playsInline = true;
       wrap.appendChild(v);
     }
 
