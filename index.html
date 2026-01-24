@@ -303,6 +303,7 @@ footer{
 
 /* ================= MEDIA POPUP ================= */
 .media-popup{
+  pointer-events:auto;
   position:fixed;
   inset:0;
   background:rgba(0,0,0,.7);
@@ -338,6 +339,30 @@ footer{
   width:100%;
   border-radius:14px;
   object-fit:cover;
+}
+
+.media-header{
+  position:relative;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:0 6px 14px;
+  z-index:5;
+}
+
+.media-close{
+  font-size:28px;
+  width:40px;
+  height:40px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:50%;
+  background:rgba(255,255,255,.18);
+  cursor:pointer;
+
+  pointer-events:auto;   /* 🔥 penting */
+  z-index:10;
 }
 
 /* ================= FULLSCREEN ================= */
@@ -630,12 +655,24 @@ if(type==="video"){
   popup.classList.add("active");
 }
 
-function closeMedia(){
+function closeMedia(e){
+  if(e){
+    e.preventDefault();
+    e.stopImmediatePropagation(); // 🔥 WAJIB
+  }
+
   const popup=document.getElementById("mediaPopup");
   const grid=document.getElementById("mediaGrid");
+
   grid.innerHTML="";
   popup.classList.remove("active");
 }
+
+document.getElementById("mediaPopup").addEventListener("click",e=>{
+  if(e.target.id==="mediaPopup"){
+    closeMedia();
+  }
+});
 
 /* =========================
    MODAL CLOSE
