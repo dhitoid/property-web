@@ -16,6 +16,7 @@
 }
 
 *{box-sizing:border-box}
+html{scroll-behavior:smooth}
 body{
   margin:0;
   font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif;
@@ -47,11 +48,11 @@ nav a{color:var(--muted);margin-left:18px;text-decoration:none}
   text-align:center;
 }
 .hero h1{font-size:44px}
-.hero p{color:var(--muted);max-width:620px}
+.hero p{color:var(--muted);max-width:620px;margin:18px 0}
 
 /* BUTTON */
 .btn{
-  padding:14px 26px;
+  padding:14px 28px;
   border-radius:30px;
   border:1px solid rgba(255,255,255,.3);
   color:white;
@@ -70,7 +71,7 @@ section{padding:90px 6%}
 }
 .project-card{
   background:var(--card);
-  border-radius:24px;
+  border-radius:26px;
   padding:22px;
   cursor:pointer;
   transition:.35s;
@@ -80,24 +81,8 @@ section{padding:90px 6%}
   background:rgba(255,255,255,.14);
 }
 
-/* CONTACT */
-.social-grid{
-  display:flex;
-  gap:16px;
-}
-.social-grid a{
-  width:42px;
-  height:42px;
-  border-radius:50%;
-  background:var(--card);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-.social-grid img{
-  width:20px;
-  filter:invert(1);
-}
+/* CONTACT ICON */
+.social-card img{width:22px;height:22px}
 
 /* MODAL */
 .modal{
@@ -109,6 +94,7 @@ section{padding:90px 6%}
 }
 .modal.active{display:block}
 
+/* SHEET */
 .sheet{
   position:absolute;
   left:50%;
@@ -129,6 +115,7 @@ section{padding:90px 6%}
   border-radius:10px;
   margin:12px auto;
 }
+
 .sheet-body{
   max-height:78vh;
   overflow-y:auto;
@@ -136,38 +123,33 @@ section{padding:90px 6%}
 }
 
 /* MEDIA */
-.gallery, .video-box{display:none;margin-top:20px}
+.gallery,.video-box{display:none;margin-bottom:20px}
 .gallery img{
   width:100%;
   height:220px;
   object-fit:cover;
   border-radius:18px;
-  margin-bottom:12px;
+  opacity:0;
+  transform:scale(.98);
+  transition:.4s;
 }
+.gallery img.loaded{opacity:1;transform:scale(1)}
 video{width:100%;border-radius:18px}
 
 /* CTA */
 .cta-group{display:flex;gap:12px;flex-wrap:wrap}
 .cta-group a{flex:1;text-align:center}
 
-/* FLOATING WA */
-.floating-wa{
-  position:fixed;
-  right:18px;
-  bottom:18px;
-  width:56px;
-  height:56px;
-  border-radius:50%;
-  background:#25D366;
+/* CONTACT */
+.social-grid{
   display:flex;
-  align-items:center;
-  justify-content:center;
-  z-index:200;
+  gap:18px;
+  flex-wrap:wrap;
 }
-.floating-wa img{width:26px}
 
 @media(max-width:600px){
   .hero h1{font-size:32px}
+  .cta-group{flex-direction:column}
 }
 </style>
 </head>
@@ -194,16 +176,16 @@ video{width:100%;border-radius:18px}
 </section>
 
 <section id="contact">
-  <h2>Kontak</h2>
+  <h2>Hubungi Saya</h2>
   <div class="social-grid">
-    <a href="https://wa.me/6281802168184"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/whatsapp.svg"></a>
-    <a href="https://instagram.com/dhitoproperty.id"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/instagram.svg"></a>
-    <a href="https://tiktok.com/@dhitopropertyid"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/tiktok.svg"></a>
-    <a href="mailto:dhitoproperty@gmail.com"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/gmail.svg"></a>
+    <a href="https://wa.me/6281802168184" class="btn">WA</a>
+    <a href="https://instagram.com/dhitoproperty.id" class="btn">IG</a>
+    <a href="https://tiktok.com/@dhitopropertyid" class="btn">TikTok</a>
+    <a href="mailto:dhitoproperty@gmail.com" class="btn">Email</a>
   </div>
 </section>
 
-<footer>© 2026 Nour Maandhito — Marketing Property</footer>
+<footer>© 2026 Nour Maandhito</footer>
 
 <!-- MODAL -->
 <div id="modal" class="modal">
@@ -213,86 +195,106 @@ video{width:100%;border-radius:18px}
   </div>
 </div>
 
-<!-- FLOATING WA -->
-<a id="floatingWA" class="floating-wa" target="_blank">
-  <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/whatsapp.svg">
-</a>
-
 <script>
 let projects=[];
-let currentProject=null;
 
 fetch("projects.json")
 .then(r=>r.json())
-.then(d=>{projects=d;renderProjects()})
+.then(d=>{projects=d;renderProjects()});
 
 function renderProjects(){
-  const g=document.getElementById("projectGrid");
-  g.innerHTML="";
+  const grid=document.getElementById("projectGrid");
+  grid.innerHTML="";
   projects.forEach((p,i)=>{
-    const c=document.createElement("div");
-    c.className="project-card";
-    c.innerHTML=`
+    const card=document.createElement("div");
+    card.className="project-card";
+    card.innerHTML=`
       <h3>${p.name}</h3>
       <p style="color:var(--muted)">📍 ${p.location}<br>💰 ${p.price}</p>
     `;
-    c.onclick=()=>openModal(i);
-    g.appendChild(c);
+    card.onclick=()=>openModal(i);
+    grid.appendChild(card);
   });
 }
 
 function openModal(i){
-  currentProject=projects[i];
+  const p=projects[i];
   document.body.classList.add("modal-open");
 
   modalBody.innerHTML=`
-    <h2>${currentProject.name}</h2>
-    <p style="color:var(--muted)">📍 ${currentProject.location}</p>
+    <h2>${p.name}</h2>
+    <p style="color:var(--muted)">📍 ${p.location}</p>
 
     <div class="cta-group">
       <a class="btn" onclick="showGallery()">Lihat Foto</a>
       <a class="btn" onclick="showVideo()">Lihat Video</a>
     </div>
 
-    <div id="gallery" class="gallery">
-      ${currentProject.images.map(img=>`<img src="${img}">`).join("")}
+    <div class="gallery" id="gallery">
+      ${p.images.map(img=>`<img data-src="${img}">`).join("")}
     </div>
 
-    <div id="videoBox" class="video-box">
-      <video src="${currentProject.video}" controls playsinline></video>
+    <div class="video-box" id="videoBox">
+      <video src="${p.video}" controls playsinline></video>
     </div>
 
-    <div class="cta-group" style="margin-top:20px">
-      <a href="${currentProject.mapLink}" target="_blank" class="btn">Google Maps</a>
-      <a href="${waLink(currentProject.name)}" target="_blank" class="btn primary">Tanya Unit</a>
+    <div class="cta-group">
+      <a href="${p.mapLink}" target="_blank" class="btn">Google Maps</a>
+      <a href="${generateWA(p.name)}" target="_blank" class="btn primary">Tanya Unit</a>
     </div>
   `;
 
   modal.classList.add("active");
-  floatingWA.href=waLink(currentProject.name);
+  lazyLoadGallery();
+  initSwipe();
 }
 
 function showGallery(){
   gallery.style.display="block";
   videoBox.style.display="none";
 }
-
 function showVideo(){
   videoBox.style.display="block";
   gallery.style.display="none";
 }
 
-function waLink(name){
-  return `https://wa.me/6281802168184?text=${encodeURIComponent(
-    `Halo, saya telah melihat website Dhito Property dan tertarik dengan project ${name}.`
-  )}`;
+function lazyLoadGallery(){
+  document.querySelectorAll(".gallery img").forEach(img=>{
+    img.src=img.dataset.src;
+    img.onload=()=>img.classList.add("loaded");
+  });
 }
 
-modal.onclick=e=>{
-  if(e.target.id==="modal"){
-    modal.classList.remove("active");
-    document.body.classList.remove("modal-open");
-  }
+function initSwipe(){
+  const sheet=document.querySelector(".sheet");
+  const body=document.querySelector(".sheet-body");
+  let startY=0,drag=false;
+
+  sheet.addEventListener("touchstart",e=>{
+    if(body.scrollTop===0){
+      startY=e.touches[0].clientY;
+      drag=true;
+      sheet.style.transition="none";
+    }
+  });
+
+  sheet.addEventListener("touchmove",e=>{
+    if(!drag)return;
+    const diff=e.touches[0].clientY-startY;
+    if(diff>0) sheet.style.transform=`translate(-50%,${diff}px)`;
+  });
+
+  sheet.addEventListener("touchend",()=>{
+    drag=false;
+    sheet.style.transition="transform .45s cubic-bezier(.22,.61,.36,1)";
+    sheet.style.transform="translate(-50%,0)";
+  });
+}
+
+function generateWA(project){
+  return `https://wa.me/6281802168184?text=${encodeURIComponent(
+    "Halo, saya tertarik dengan rumah di"+project
+  )}`;
 }
 </script>
 
