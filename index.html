@@ -173,6 +173,38 @@ body.modal-open{
   position:relative;
 }
 
+/* GALLERY SLIDER */
+.gallery{
+  display:flex;
+  gap:14px;
+  overflow-x:auto;
+  scroll-snap-type:x mandatory;
+  -webkit-overflow-scrolling:touch;
+  margin-bottom:20px;
+}
+
+.gallery img{
+  flex:0 0 100%;
+  height:220px;
+  object-fit:cover;
+  border-radius:20px;
+  scroll-snap-align:center;
+}
+
+/* iOS swipe hint */
+.gallery::-webkit-scrollbar{
+  display:none;
+}
+
+/* swipe indicator */
+.swipe-bar{
+  width:46px;
+  height:5px;
+  background:rgba(255,255,255,.35);
+  border-radius:10px;
+  margin:0 auto 14px;
+}
+
 @media(max-width:600px){
   .hero h1{font-size:32px}
 }
@@ -255,7 +287,12 @@ function openModal(i){
   document.body.classList.add("modal-open");
 
   document.getElementById("modalBody").innerHTML = `
-    <img src="${p.image}">
+    <div class="swipe-bar"></div>
+
+    <div class="gallery">
+      ${p.images.map(img=>`<img src="${img}">`).join("")}
+    </div>
+
     <h2>${p.name}</h2>
     <p style="color:var(--muted)">📍 ${p.location} • 💰 ${p.price}</p>
 
@@ -267,24 +304,58 @@ function openModal(i){
 
     <h4>Lokasi</h4>
     <iframe 
-      src="${p.map}"
+      src="${p.mapEmbed}"
       width="100%" 
-      height="260" 
-      style="border-radius:20px;border:0"
-      loading="lazy"
-      referrerpolicy="no-referrer-when-downgrade">
+      height="260"
+      style="border:0;border-radius:20px"
+      loading="lazy">
     </iframe>
 
-    <a href="https://wa.me/6281802168184" class="btn primary">
-      Tanya Unit Tersedia
-    </a>
+    <div style="margin-top:16px">
+      <a href="${p.mapLink}" target="_blank" class="btn">
+        Buka di Google Maps
+      </a>
+      <a href="https://wa.me/6281802168184" class="btn primary">
+        Tanya Unit Tersedia
+      </a>
+    </div>
   `;
+
   document.getElementById("modal").classList.add("active");
+  enableSwipeToClose();
 }
 
 function closeModal(){
   document.getElementById("modal").classList.remove("active");
   document.body.classList.remove("modal-open");
+}
+
+function enableSwipeToClose(){
+  const modal = document.querySelector(".modal-content");
+  let startY = 0;
+  let currentY = 0;
+
+  modal.addEventListener("touchstart", e=>{
+    startY = e.touches[0].clientY;
+  });
+
+  modal.addEventListener("touchmove", e=>{
+    currentY = e.touches[0].clientY;
+    const diff = currentY - startY;
+
+    if(diff > 0){
+      modal.style.transform = `translateY(${diff}px)`;
+    }
+
+    if(diff > 120){
+      closeModal();
+      modal.style.transform = "";
+    }
+  });
+
+  modal.addEventListener("touchend", ()=>{
+    modal.style.transform = "";
+  });
 }
 </script>
 
