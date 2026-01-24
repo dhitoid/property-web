@@ -27,10 +27,33 @@ body{
   font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif;
   color:var(--text);
   background:
-    radial-gradient(1200px at 10% 10%, #2a2a32 0%, transparent 60%),
-    radial-gradient(900px at 90% 20%, #1f1f25 0%, transparent 55%),
-    linear-gradient(160deg, var(--bg1), var(--bg2), var(--bg3));
+    radial-gradient(1200px at 15% 10%, rgba(255,255,255,.18), transparent 60%),
+    radial-gradient(900px at 85% 20%, rgba(200,200,200,.12), transparent 55%),
+    radial-gradient(700px at 40% 80%, rgba(255,255,255,.08), transparent 60%),
+    linear-gradient(
+      160deg,
+      #0f0f12,
+      #1a1a1f,
+      #242428
+    );
   background-attachment:fixed;
+}
+
+body::after{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  background:
+    repeating-linear-gradient(
+      45deg,
+      rgba(255,255,255,.015),
+      rgba(255,255,255,.015) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+  mix-blend-mode:overlay;
+  opacity:.25;
 }
 
 body.modal-open{overflow:hidden}
@@ -223,7 +246,14 @@ footer{
   position:absolute;
   top:14px;
   right:18px;
-  font-size:22px;
+  font-size:26px;       /* lebih gede */
+  width:40px;
+  height:40px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:50%;
+  background:rgba(255,255,255,.15);
   cursor:pointer;
 }
 
@@ -322,11 +352,18 @@ footer{
 
 .fs-dots{
   position:absolute;
-  bottom:18px;
+  bottom:22px;
   left:50%;
   transform:translateX(-50%);
   display:flex;
   gap:8px;
+  opacity:0;
+  transition:opacity .35s ease;
+  pointer-events:none;
+}
+
+.fs-dots.show{
+  opacity:1;
 }
 
 .fs-dots span{
@@ -335,7 +372,9 @@ footer{
   border-radius:50%;
   background:rgba(255,255,255,.35);
 }
-.fs-dots span.active{background:white}
+.fs-dots span.active{
+  background:white;
+}
 
 /* ================= SPLASH ================= */
 .splash{
@@ -363,6 +402,22 @@ footer{
 @media(max-width:600px){
   .hero h1{font-size:32px}
 }
+
+.fs-header span{
+  position:absolute;
+  top:18px;
+  right:20px;
+  font-size:32px;        /* sebelumnya kecil */
+  width:42px;
+  height:42px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:50%;
+  background:rgba(255,255,255,.15);
+  cursor:pointer;
+}
+
 </style>
 </head>
 
@@ -621,6 +676,17 @@ function generateWA(projectName){
 
 let fsIndex=0;
 let fsItems=[];
+let dotsTimer=null;
+
+function showDots(){
+  const dots=document.getElementById("fsDots");
+  dots.classList.add("show");
+
+  clearTimeout(dotsTimer);
+  dotsTimer=setTimeout(()=>{
+    dots.classList.remove("show");
+  },1800);
+}
 
 function openFullscreen(type,start=0){
   showSplash();
@@ -662,6 +728,7 @@ function openFullscreen(type,start=0){
   track.style.transform=`translateX(-${fsIndex*100}%)`;
   fs.classList.add("active");
 
+  document.getElementById("fullscreen").onclick = showDots;
   initFullscreenSwipe(type);
   setTimeout(hideSplash,300);
 }
@@ -675,6 +742,7 @@ function updateDots(){
   document.querySelectorAll(".fs-dots span").forEach((d,i)=>{
     d.classList.toggle("active",i===fsIndex);
   });
+  showDots(); // 🔥 auto show + auto hide
 }
 
 function initFullscreenSwipe(type){
@@ -683,11 +751,12 @@ function initFullscreenSwipe(type){
 
   track.onpointerdown=e=>{
     startX=e.clientX;
+    currentX=e.clientX;
     track.style.transition="none";
   };
 
   track.onpointermove=e=>{
-    if(!startX) return;
+    if(startX===null) return;
     currentX=e.clientX;
     const diff=currentX-startX;
     track.style.transform=`translateX(calc(-${fsIndex*100}% + ${diff}px))`;
@@ -697,13 +766,18 @@ function initFullscreenSwipe(type){
     const diff=currentX-startX;
     track.style.transition="transform .35s cubic-bezier(.22,.61,.36,1)";
 
-    if(diff<-80 && fsIndex<fsItems.length-1) fsIndex++;
-    if(diff>80 && fsIndex>0) fsIndex--;
+    if(diff < -80 && fsIndex < fsItems.length-1) fsIndex++;
+    if(diff > 80 && fsIndex > 0) fsIndex--;
 
     track.style.transform=`translateX(-${fsIndex*100}%)`;
-    startX=0;
+
+    updateDots(); // 🔥 INI KUNCI NYA
+
+    startX=null;
+    currentX=0;
   };
-  updateDots();
+
+  track.onpointercancel = track.onpointerup;
 }
 
 </script>
