@@ -1,50 +1,51 @@
 [
   {
     "name": "Grand Pakis Residence",
+    "location": "Pamulang",
+    "price": "Mulai 3 Jutaan",
+
+    "description": "Grand Pakis Residence adalah perumahan modern satu lantai dengan konsep nyaman, aman, dan akses strategis. Cocok untuk keluarga muda maupun investasi jangka panjang.",
+
     "images": [
       "assets/rumah1.jpg",
       "assets/rumah1b.jpg",
       "assets/rumah1c.jpg"
     ],
-    "location": "Pamulang",
-    "price": "Mulai 3 Jutaan",
-    "mapEmbed": "https://www.google.com/maps?q=Pamulang&output=embed",
-    "mapLink": "https://maps.google.com/?q=Pamulang",
-    "specs": [
-      "Type 36",
-      "Luas Tanah 72–125 m²",
-      "2 Kamar Tidur",
-      "1 Kamar Mandi",
-      "Carport"
+
+    "video": "assets/preview-pakis.mp4",
+
+    "nearby": [
+      "10 menit ke RS Hermina",
+      "15 menit ke Taman Tekno",
+      "10 menit ke Jalan Raya Puspitek",
+      "10 menit ke Kampus UNPAM Viktor",
+      "10 menit ke Pamulang"
     ],
-    "advantages": [
-      "One Gate System",
-      "Dekat Pamulang & Puspitek",
-      "Booking ringan & all in"
-    ]
+
+    "mapLink": "https://maps.google.com/?q=Pamulang"
   },
-    {
+  {
     "name": "Grand Duta Pakis",
+    "location": "Pamulang",
+    "price": "Mulai 3 Jutaan",
+
+    "description": "Grand Duta Pakis menghadirkan hunian minimalis modern dengan lingkungan tenang dan sistem keamanan one gate. Proses KPR mudah dan legalitas aman.",
+
     "images": [
       "assets/rumah1.jpg",
       "assets/rumah1b.jpg",
       "assets/rumah1c.jpg"
     ],
-    "location": "Pamulang",
-    "price": "Mulai 3 Jutaan",
-    "mapEmbed": "https://www.google.com/maps?q=Pamulang&output=embed",
-    "mapLink": "https://maps.google.com/?q=Pamulang",
-    "specs": [
-      "Type 36",
-      "Luas Tanah 72–125 m²",
-      "2 Kamar Tidur",
-      "1 Kamar Mandi",
-      "Carport"
+
+    "video": "assets/preview-duta.mp4",
+
+    "nearby": [
+      "10 menit ke RS Hermina",
+      "15 menit ke Taman Tekno",
+      "Dekat Jalan Raya Provinsi",
+      "Akses cepat ke Pamulang & BSD"
     ],
-    "advantages": [
-      "One Gate System",
-      "Dekat Pamulang & Puspitek",
-      "Booking ringan & all in"
-    ]
+
+    "mapLink": "https://maps.google.com/?q=Pamulang"
   }
 ]
