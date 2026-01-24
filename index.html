@@ -482,7 +482,7 @@ footer{
 <div id="fullscreen" class="fullscreen">
   <div id="fsDots" class="fs-dots"></div>
   <div class="fs-header">
-    <span onclick="closeFullscreen()">✕</span>
+    <span class="fs-close" onclick="closeFullscreen(event)">✕</span>
   </div>
   <div id="fsTrack" class="fs-track"></div>
 </div>
@@ -728,12 +728,19 @@ function openFullscreen(type,start=0){
   track.style.transform=`translateX(-${fsIndex*100}%)`;
   fs.classList.add("active");
 
-  document.getElementById("fullscreen").onclick = showDots;
+  const fullscreenEl = document.getElementById("fullscreen");
+
+fullscreenEl.onclick = (e)=>{
+  if(e.target.closest(".fs-close")) return; // ⛔ jangan ganggu close
+  showDots();
+};
+
   initFullscreenSwipe(type);
   setTimeout(hideSplash,300);
 }
 
-function closeFullscreen(){
+function closeFullscreen(e){
+  e?.stopPropagation();
   document.querySelectorAll(".fs-item video").forEach(v=>v.pause());
   document.getElementById("fullscreen").classList.remove("active");
 }
