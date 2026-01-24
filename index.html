@@ -768,7 +768,7 @@ fullscreenEl.addEventListener("click",(e)=>{
   showDots();
 });
 
-const IMAGE_EXT = /\.(jpg|jpeg|png|webp|gif)$/i;
+const IMAGE_EXT = /\.(JPG|JPEG|PNG|WEBP|GIF)$/i;
 const VIDEO_EXT = /\.(mp4|webm|ogg|mov)$/i;
 
 function isImage(src){ return IMAGE_EXT.test(src); }
@@ -881,8 +881,6 @@ function initFullscreenSwipe(type){
 
   track.onpointercancel = track.onpointerup;
 }
-
 </script>
-
 </body>
 </html>
