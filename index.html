@@ -26,17 +26,36 @@ body{
   margin:0;
   font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif;
   color:var(--text);
+
   background:
-    radial-gradient(1200px at 15% 10%, rgba(255,255,255,.18), transparent 60%),
-    radial-gradient(900px at 85% 20%, rgba(200,200,200,.12), transparent 55%),
-    radial-gradient(700px at 40% 80%, rgba(255,255,255,.08), transparent 60%),
+    radial-gradient(1400px at 10% 10%, rgba(255,255,255,.22), transparent 60%),
+    radial-gradient(1000px at 90% 15%, rgba(220,220,220,.14), transparent 55%),
+    radial-gradient(900px at 50% 90%, rgba(255,255,255,.10), transparent 65%),
     linear-gradient(
       160deg,
-      #0f0f12,
-      #1a1a1f,
-      #242428
+      #0c0c0f,
+      #151519,
+      #1f1f24
     );
+
   background-attachment:fixed;
+}
+
+body::before{
+  content:"";
+  position:fixed;
+  inset:-20%;
+  background:
+    radial-gradient(50% 40% at 30% 30%, rgba(255,255,255,.08), transparent 60%),
+    radial-gradient(40% 50% at 70% 70%, rgba(255,255,255,.06), transparent 60%);
+  animation:floatGlow 18s ease-in-out infinite alternate;
+  pointer-events:none;
+  z-index:-1;
+}
+
+@keyframes floatGlow{
+  from{transform:translateY(-20px)}
+  to{transform:translateY(20px)}
 }
 
 body::after{
@@ -47,13 +66,13 @@ body::after{
   background:
     repeating-linear-gradient(
       45deg,
-      rgba(255,255,255,.015),
-      rgba(255,255,255,.015) 1px,
+      rgba(255,255,255,.02),
+      rgba(255,255,255,.02) 1px,
       transparent 1px,
       transparent 3px
     );
   mix-blend-mode:overlay;
-  opacity:.25;
+  opacity:.18;
 }
 
 body.modal-open{overflow:hidden}
