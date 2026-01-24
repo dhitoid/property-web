@@ -301,9 +301,7 @@ function openModal(i){
       ${(p.images||[]).map(img=>`<img data-src="${img}">`).join("")}
     </div>
 
-    <div class="video-box" id="videoBox">
-      ${p.video ? `<video src="${p.video}" controls playsinline></video>` : ""}
-    </div>
+    <div class="video-box" id="videoBox"></div>
 
     <div class="cta-group">
       <a href="${p.mapLink}" target="_blank" class="btn">Google Maps</a>
