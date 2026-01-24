@@ -193,6 +193,86 @@ footer{text-align:center;padding:40px;color:var(--muted)}
 @media(max-width:600px){
   .hero h1{font-size:32px}
 }
+
+/* ACTION BAR */
+.action-bar{
+  display:flex;
+  gap:14px;
+  margin:22px 0;
+}
+
+.action-btn{
+  flex:1;
+  background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.25);
+  border-radius:18px;
+  padding:14px 0;
+  color:white;
+  font-size:15px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+  cursor:pointer;
+}
+
+.action-btn span{
+  font-size:13px;
+  color:var(--muted);
+}
+
+.cta-group.bottom{
+  display:flex;
+  gap:14px;
+  margin-top:26px;
+}
+
+/* FULLSCREEN VIEWER */
+.fullscreen{
+  position:fixed;
+  inset:0;
+  background:black;
+  display:none;
+  z-index:999;
+  touch-action:pan-y;
+}
+
+.fullscreen.active{display:block}
+
+.fs-header{
+  position:absolute;
+  top:18px;
+  right:18px;
+  z-index:5;
+  font-size:22px;
+  color:white;
+}
+
+.fs-track{
+  display:flex;
+  height:100%;
+  transition:transform .35s cubic-bezier(.22,.61,.36,1);
+}
+
+.fs-item{
+  min-width:100%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.fs-item img{
+  max-width:100%;
+  max-height:100%;
+  object-fit:contain;
+}
+
+.fs-item video{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+}
+
 </style>
 </head>
 
@@ -250,6 +330,14 @@ footer{text-align:center;padding:40px;color:var(--muted)}
   </div>
 </div>
 
+<!-- FULLSCREEN VIEWER -->
+<div id="fullscreen" class="fullscreen">
+  <div class="fs-header">
+    <span onclick="closeFullscreen()">✕</span>
+  </div>
+  <div id="fsTrack" class="fs-track"></div>
+</div>
+
 <script>
 let projects=[];
 let currentProject=null;
@@ -291,10 +379,14 @@ function openModal(i){
       <ul>${p.nearby.map(n=>`<li>${n}</li>`).join("")}</ul>
     ` : ""}
 
-    <div class="cta-group">
-      <a class="btn" onclick="showGallery()">Lihat Foto</a>
-      <a class="btn" onclick="showVideo()">Lihat Video</a>
-    </div>
+<div class="action-bar">
+  <button class="action-btn" onclick="showGallery()">
+    📷 <span>Foto</span>
+  </button>
+  <button class="action-btn" onclick="showVideo()">
+    🎬 <span>Video</span>
+  </button>
+</div>
 
     <!-- TETAP ADA (TIDAK DIHAPUS) -->
     <div class="gallery" id="gallery">
@@ -303,10 +395,10 @@ function openModal(i){
 
     <div class="video-box" id="videoBox"></div>
 
-    <div class="cta-group">
-      <a href="${p.mapLink}" target="_blank" class="btn">Google Maps</a>
-      <a href="${generateWA(p.name)}" target="_blank" class="btn primary">Tanya Unit</a>
-    </div>
+<div class="cta-group bottom">
+  <a href="${p.mapLink}" target="_blank" class="btn">Google Maps</a>
+  <a href="${generateWA(p.name)}" target="_blank" class="btn primary">Tanya Unit</a>
+</div>
   `;
 
   initSwipe();
@@ -334,24 +426,25 @@ function openMedia(type){
   grid.innerHTML="";
 
   if(type==="photo"){
-    title.innerText="Foto Project";
-    (currentProject.images||[]).forEach(img=>{
-      const el=document.createElement("img");
-      el.src=img;
-      grid.appendChild(el);
-    });
-  }
+  title.innerText="Foto Project";
+  (currentProject.images||[]).forEach((img,i)=>{
+    const el=document.createElement("img");
+    el.src=img;
+    el.onclick=()=>openFullscreen("photo",i);
+    grid.appendChild(el);
+  });
+}
 
-  if(type==="video"){
-    title.innerText="Video Project";
-    (currentProject.videos||[]).forEach(v=>{
-      const el=document.createElement("video");
-      el.src=v;
-      el.controls=true;
-      el.playsInline=true;
-      grid.appendChild(el);
-    });
-  }
+if(type==="video"){
+  title.innerText="Video Project";
+  (currentProject.videos||[]).forEach((v,i)=>{
+    const el=document.createElement("video");
+    el.src=v;
+    el.muted=true;
+    el.onclick=()=>openFullscreen("video",i);
+    grid.appendChild(el);
+  });
+}
 
   popup.classList.add("active");
 }
@@ -420,6 +513,75 @@ function generateWA(projectName){
     `Halo, saya telah melihat website Dhito Property dan tertarik dengan project ${projectName}.`
   )}`;
 }
+
+let fsIndex=0;
+let fsItems=[];
+
+function openFullscreen(type,start=0){
+  const fs=document.getElementById("fullscreen");
+  const track=document.getElementById("fsTrack");
+
+  track.innerHTML="";
+  fsItems = type==="photo" ? currentProject.images : currentProject.videos;
+  fsIndex=start;
+
+  fsItems.forEach(src=>{
+    const wrap=document.createElement("div");
+    wrap.className="fs-item";
+
+    if(type==="photo"){
+      const img=document.createElement("img");
+      img.src=src;
+      wrap.appendChild(img);
+    }else{
+      const v=document.createElement("video");
+      v.src=src;
+      v.controls=true;
+      v.playsInline=true;
+      wrap.appendChild(v);
+    }
+    track.appendChild(wrap);
+  });
+
+  track.style.transform=`translateX(-${fsIndex*100}%)`;
+  fs.classList.add("active");
+
+  initFullscreenSwipe(type);
+}
+
+function closeFullscreen(){
+  document.querySelectorAll(".fs-item video").forEach(v=>v.pause());
+  document.getElementById("fullscreen").classList.remove("active");
+}
+
+function initFullscreenSwipe(type){
+  const track=document.getElementById("fsTrack");
+  let startX=0,currentX=0;
+
+  track.onpointerdown=e=>{
+    startX=e.clientX;
+    track.style.transition="none";
+  };
+
+  track.onpointermove=e=>{
+    if(!startX) return;
+    currentX=e.clientX;
+    const diff=currentX-startX;
+    track.style.transform=`translateX(calc(-${fsIndex*100}% + ${diff}px))`;
+  };
+
+  track.onpointerup=()=>{
+    const diff=currentX-startX;
+    track.style.transition="transform .35s cubic-bezier(.22,.61,.36,1)";
+
+    if(diff<-80 && fsIndex<fsItems.length-1) fsIndex++;
+    if(diff>80 && fsIndex>0) fsIndex--;
+
+    track.style.transform=`translateX(-${fsIndex*100}%)`;
+    startX=0;
+  };
+}
+
 </script>
 
 </body>
