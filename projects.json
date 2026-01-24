@@ -12,7 +12,9 @@
       "assets/rumah1c.jpg"
     ],
 
-    "video": "assets/preview-pakis.mp4",
+    "videos": [
+      "assets/preview-pakis.mp4"
+    ],
 
     "nearby": [
       "10 menit ke RS Hermina",
@@ -37,7 +39,9 @@
       "assets/rumah1c.jpg"
     ],
 
-    "video": "assets/preview-duta.mp4",
+    "videos": [
+      "assets/preview-duta.mp4"
+    ],
 
     "nearby": [
       "10 menit ke RS Hermina",
