@@ -1,0 +1,37 @@
+[
+  {
+    "name": "Grand Pakis Residence",
+    "image": "assets/rumah1.jpg",
+    "location": "Pamulang",
+    "price": "Mulai 3 Jutaan",
+    "specs": [
+      "Type 36",
+      "Luas Tanah 72–125 m²",
+      "2 Kamar Tidur",
+      "1 Kamar Mandi",
+      "Carport"
+    ],
+    "advantages": [
+      "One Gate System",
+      "Dekat Pamulang & Puspitek",
+      "Booking ringan & all in"
+    ]
+  },
+  {
+    "name": "Puspitek Residence",
+    "image": "assets/rumah2.jpg",
+    "location": "Setu",
+    "price": "Mulai 3,5 Jutaan",
+    "specs": [
+      "Type 36",
+      "Luas Tanah hingga 120 m²",
+      "2 Kamar Tidur",
+      "1 Kamar Mandi"
+    ],
+    "advantages": [
+      "Dekat RS Hermina",
+      "Akses jalan lebar",
+      "Lingkungan nyaman"
+    ]
+  }
+]
