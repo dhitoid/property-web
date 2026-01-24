@@ -4,6 +4,7 @@
     "image": "assets/rumah1.jpg",
     "location": "Pamulang",
     "price": "Mulai 3 Jutaan",
+    "map": "https://www.google.com/maps?q=Pamulang&output=embed",
     "specs": [
       "Type 36",
       "Luas Tanah 72–125 m²",
@@ -18,10 +19,11 @@
     ]
   },
   {
-    "name": "Puspitek Residence",
+    "name": "Grand Duta Pakis",
     "image": "assets/rumah2.jpg",
     "location": "Setu",
     "price": "Mulai 3,5 Jutaan",
+    "map": "https://www.google.com/maps?q=Pamulang&output=embed",
     "specs": [
       "Type 36",
       "Luas Tanah hingga 120 m²",
