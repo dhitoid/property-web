@@ -7,9 +7,9 @@
     "description": "Grand Pakis Residence adalah perumahan modern satu lantai dengan konsep nyaman, aman, dan akses strategis. Cocok untuk keluarga muda maupun investasi jangka panjang.",
 
     "images": [
-      "assets/brosur.jpg",
-      "assets/spekgpr.jpg",
-      "assets/gpr1.jpg"
+      "assets/gpr/brosur.jpg",
+      "assets/gpr/spekgpr.jpg",
+      "assets/gpr/gpr1.jpg"
     ],
 
     "videos": [
