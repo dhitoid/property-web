@@ -205,6 +205,41 @@ body.modal-open{
   margin:0 auto 14px;
 }
 
+/* MODAL SECTION */
+.modal-section{
+  margin-top:28px;
+}
+
+.modal-section h4{
+  margin-bottom:12px;
+}
+
+/* MAP WRAPPER */
+.map-wrapper{
+  border-radius:22px;
+  overflow:hidden;
+  margin-bottom:18px;
+}
+
+/* CTA BUTTON GROUP */
+.cta-group{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
+.cta-group a{
+  flex:1;
+  text-align:center;
+}
+
+/* Mobile optimization */
+@media(max-width:600px){
+  .cta-group{
+    flex-direction:column;
+  }
+}
+
 @media(max-width:600px){
   .hero h1{font-size:32px}
 }
@@ -296,28 +331,37 @@ function openModal(i){
     <h2>${p.name}</h2>
     <p style="color:var(--muted)">📍 ${p.location} • 💰 ${p.price}</p>
 
-    <h4>Spesifikasi</h4>
-    <ul>${p.specs.map(s=>`<li>${s}</li>`).join("")}</ul>
+    <div class="modal-section">
+      <h4>Spesifikasi</h4>
+      <ul>${p.specs.map(s=>`<li>${s}</li>`).join("")}</ul>
+    </div>
 
-    <h4>Keunggulan</h4>
-    <ul>${p.advantages.map(a=>`<li>${a}</li>`).join("")}</ul>
+    <div class="modal-section">
+      <h4>Keunggulan</h4>
+      <ul>${p.advantages.map(a=>`<li>${a}</li>`).join("")}</ul>
+    </div>
 
-    <h4>Lokasi</h4>
-    <iframe 
-      src="${p.mapEmbed}"
-      width="100%" 
-      height="260"
-      style="border:0;border-radius:20px"
-      loading="lazy">
-    </iframe>
+    <div class="modal-section">
+      <h4>Lokasi</h4>
 
-    <div style="margin-top:16px">
-      <a href="${p.mapLink}" target="_blank" class="btn">
-        Buka di Google Maps
-      </a>
-      <a href="https://wa.me/6281802168184" class="btn primary">
-        Tanya Unit Tersedia
-      </a>
+      <div class="map-wrapper">
+        <iframe 
+          src="${p.mapEmbed}"
+          width="100%"
+          height="260"
+          style="border:0"
+          loading="lazy">
+        </iframe>
+      </div>
+
+      <div class="cta-group">
+        <a href="${p.mapLink}" target="_blank" class="btn">
+          Buka Google Maps
+        </a>
+        <a href="https://wa.me/6281802168184" class="btn primary">
+          Tanya Unit
+        </a>
+      </div>
     </div>
   `;
 
