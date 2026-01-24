@@ -464,6 +464,26 @@ footer{
   cursor:pointer;
 }
 
+/* === FIX CLOSE FULLSCREEN IOS === */
+.fs-header{
+  position:fixed;
+  top:0;
+  right:0;
+  z-index:10000;
+  pointer-events:none;
+}
+
+.fs-close{
+  pointer-events:auto;
+  z-index:10001;
+}
+
+/* media JANGAN tangkap tap */
+.fullscreen.active img,
+.fullscreen.active video{
+  pointer-events:none;
+}
+
 </style>
 </head>
 
@@ -742,9 +762,11 @@ let dotsTimer=null;
 const fullscreenEl = document.getElementById("fullscreen");
 
 fullscreenEl.addEventListener("click",(e)=>{
-  if(e.target.closest(".fs-close")) return;
+  if (e.target.closest(".fs-close")) return;
+  if (!e.target.closest(".fs-item")) return;
   showDots();
 });
+
 
 
 function showDots(){
