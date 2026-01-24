@@ -291,6 +291,7 @@ body.modal-open{
 
 <script>
 let projects = [];
+let swipeInitialized = false;
 
 // FETCH JSON
 fetch("projects.json")
@@ -302,6 +303,8 @@ fetch("projects.json")
 
 function renderProjects(){
   const grid = document.getElementById("projectGrid");
+  grid.innerHTML = "";
+
   projects.forEach((p,i)=>{
     const card = document.createElement("div");
     card.className = "project-card";
@@ -309,10 +312,12 @@ function renderProjects(){
       <img src="${p.image}">
       <div>
         <h3>${p.name}</h3>
-        <p style="color:var(--muted)">📍 ${p.location}<br>💰 ${p.price}</p>
+        <p style="color:var(--muted)">
+          📍 ${p.location}<br>💰 ${p.price}
+        </p>
       </div>
     `;
-    card.onclick = () => openModal(i);
+    card.addEventListener("click", () => openModal(i));
     grid.appendChild(card);
   });
 }
@@ -322,14 +327,18 @@ function openModal(i){
   document.body.classList.add("modal-open");
 
   document.getElementById("modalBody").innerHTML = `
-    <div class="swipe-bar"></div>
+    <div class="modal-header">
+      <div class="swipe-bar"></div>
+    </div>
 
     <div class="gallery">
-      ${p.images.map(img=>`<img src="${img}">`).join("")}
+      ${p.images.map(img=>`<img src="${img}" alt="">`).join("")}
     </div>
 
     <h2>${p.name}</h2>
-    <p style="color:var(--muted)">📍 ${p.location} • 💰 ${p.price}</p>
+    <p style="color:var(--muted)">
+      📍 ${p.location} • 💰 ${p.price}
+    </p>
 
     <div class="modal-section">
       <h4>Spesifikasi</h4>
@@ -343,7 +352,6 @@ function openModal(i){
 
     <div class="modal-section">
       <h4>Lokasi</h4>
-
       <div class="map-wrapper">
         <iframe 
           src="${p.mapEmbed}"
@@ -366,42 +374,65 @@ function openModal(i){
   `;
 
   document.getElementById("modal").classList.add("active");
-  enableSwipeToClose();
+  initSwipeToClose();
 }
 
 function closeModal(){
   document.getElementById("modal").classList.remove("active");
   document.body.classList.remove("modal-open");
+
+  const modalContent = document.querySelector(".modal-content");
+  modalContent.style.transform = "";
 }
 
-function enableSwipeToClose(){
-  const modal = document.querySelector(".modal-content");
-  let startY = 0;
-  let currentY = 0;
+/* ===============================
+   iOS STYLE SWIPE TO CLOSE
+   =============================== */
+function initSwipeToClose(){
+  if(swipeInitialized) return;
+  swipeInitialized = true;
 
-  modal.addEventListener("touchstart", e=>{
-    startY = e.touches[0].clientY;
+  const modalContent = document.querySelector(".modal-content");
+
+  document.addEventListener("touchstart", e=>{
+    const handle = e.target.closest(".swipe-bar");
+    if(!handle) return;
+    if(modalContent.scrollTop !== 0) return;
+
+    modalContent.dataset.startY = e.touches[0].clientY;
+    modalContent.dataset.swiping = "true";
   });
 
-  modal.addEventListener("touchmove", e=>{
-    currentY = e.touches[0].clientY;
+  document.addEventListener("touchmove", e=>{
+    if(modalContent.dataset.swiping !== "true") return;
+
+    const startY = Number(modalContent.dataset.startY);
+    const currentY = e.touches[0].clientY;
     const diff = currentY - startY;
 
     if(diff > 0){
-      modal.style.transform = `translateY(${diff}px)`;
+      modalContent.style.transform = `translateY(${diff}px)`;
     }
+  });
+
+  document.addEventListener("touchend", ()=>{
+    if(modalContent.dataset.swiping !== "true") return;
+
+    const transform = modalContent.style.transform;
+    const diff = transform
+      ? Number(transform.replace(/[^\d]/g,""))
+      : 0;
 
     if(diff > 120){
       closeModal();
-      modal.style.transform = "";
     }
-  });
 
-  modal.addEventListener("touchend", ()=>{
-    modal.style.transform = "";
+    modalContent.style.transform = "";
+    modalContent.dataset.swiping = "false";
   });
 }
 </script>
+
 
 </body>
 </html>
