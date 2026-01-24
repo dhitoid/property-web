@@ -6,6 +6,7 @@
 <title>Nour Maandhito | Marketing Property</title>
 
 <style>
+/* ===== ROOT ===== */
 :root{
   --bg:#0e0e11;
   --card:rgba(255,255,255,.08);
@@ -26,7 +27,7 @@ body{
 }
 body.modal-open{overflow:hidden}
 
-/* NAV */
+/* ===== NAV ===== */
 nav{
   position:sticky;
   top:0;
@@ -39,7 +40,7 @@ nav{
 }
 nav a{color:var(--muted);margin-left:18px;text-decoration:none}
 
-/* HERO */
+/* ===== HERO ===== */
 .hero{
   min-height:100vh;
   display:flex;
@@ -51,20 +52,21 @@ nav a{color:var(--muted);margin-left:18px;text-decoration:none}
 .hero h1{font-size:44px}
 .hero p{max-width:620px;color:var(--muted);margin:18px 0 32px}
 
-/* BUTTON */
+/* ===== BUTTON ===== */
 .btn{
   padding:14px 28px;
   border-radius:30px;
   border:1px solid rgba(255,255,255,.3);
   color:white;
   text-decoration:none;
+  cursor:pointer;
 }
 .btn.primary{background:white;color:black}
 
-/* SECTION */
+/* ===== SECTION ===== */
 section{padding:90px 6%}
 
-/* PROJECT */
+/* ===== PROJECT ===== */
 .project-grid{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
@@ -82,14 +84,38 @@ section{padding:90px 6%}
   background:rgba(255,255,255,.14);
 }
 
-/* FOOTER */
+/* ===== CONTACT ===== */
+#contact{
+  text-align:center;
+}
+.contact-icons{
+  display:flex;
+  justify-content:center;
+  gap:16px;
+  margin-top:24px;
+}
+.contact-icons a{
+  width:44px;
+  height:44px;
+  border-radius:50%;
+  background:var(--card);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.contact-icons img{
+  width:20px;
+  filter:invert(1);
+}
+
+/* ===== FOOTER ===== */
 footer{
   text-align:center;
   padding:40px 20px;
   color:var(--muted);
 }
 
-/* MODAL */
+/* ===== MODAL ===== */
 .modal{
   position:fixed;
   inset:0;
@@ -134,13 +160,17 @@ footer{
   padding:0 24px 40px;
 }
 
-/* GALLERY */
+/* ===== GALLERY & VIDEO ===== */
+.gallery,
+.video-box{
+  display:none;
+  margin-top:20px;
+}
+
 .gallery{
   display:flex;
   gap:14px;
   overflow-x:auto;
-  scroll-snap-type:x mandatory;
-  margin:20px 0;
 }
 .gallery img{
   flex:0 0 100%;
@@ -155,25 +185,20 @@ footer{
   opacity:1;
   transform:scale(1);
 }
-.gallery::-webkit-scrollbar{display:none}
 
 video{
   width:100%;
   border-radius:20px;
-  margin-top:20px;
 }
 
-/* CTA */
+/* ===== CTA ===== */
 .cta-group{
   display:flex;
   gap:12px;
   margin-top:24px;
   flex-wrap:wrap;
 }
-.cta-group a{
-  flex:1;
-  text-align:center;
-}
+.cta-group a{flex:1;text-align:center}
 
 ul{
   padding-left:18px;
@@ -210,6 +235,16 @@ ul{
   <div id="projectGrid" class="project-grid"></div>
 </section>
 
+<section id="contact">
+  <h2>Hubungi Saya</h2>
+  <div class="contact-icons">
+    <a href="https://wa.me/6281802168184"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/whatsapp.svg"></a>
+    <a href="https://instagram.com/dhitoproperty.id"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/instagram.svg"></a>
+    <a href="https://www.tiktok.com/@dhitopropertyid"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/tiktok.svg"></a>
+    <a href="mailto:dhitoproperty@gmail.com"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/gmail.svg"></a>
+  </div>
+</section>
+
 <footer>© 2026 Nour Maandhito — Marketing Property</footer>
 
 <!-- MODAL -->
@@ -244,49 +279,53 @@ function renderProjects(){
 }
 
 function openModal(i){
-  const p = projects[i];
+  const p=projects[i];
 
-  // 🔥 AKTIFKAN MODAL DULU (INI PENTING)
   document.body.classList.add("modal-open");
   document.getElementById("modal").classList.add("active");
 
-  // ✅ AMANKAN DATA
-  const images = Array.isArray(p.images) ? p.images : [];
-  const nearby = Array.isArray(p.nearby) ? p.nearby : [];
-  const description = p.description || "Informasi lengkap tersedia, silakan hubungi kami.";
+  document.getElementById("modalBody").innerHTML=`
+    <h2>${p.name}</h2>
+    <p style="color:var(--muted)">📍 ${p.location} • 💰 ${p.price}</p>
 
-  // 🔥 RENDER KONTEN
-  document.getElementById("modalBody").innerHTML = `
-    ${images.length ? `
-    <div class="gallery">
-      ${images.map(img=>`<img data-src="${img}">`).join("")}
-    </div>` : ""}
+    <p>${p.description || ""}</p>
 
-    <h2>${p.name || "-"}</h2>
-    <p style="color:var(--muted)">
-      📍 ${p.location || "-"} • 💰 ${p.price || "-"}
-    </p>
-
-    <p>${description}</p>
-
-    ${nearby.length ? `
-    <h4>Lokasi Terdekat</h4>
-    <ul>
-      ${nearby.map(n=>`<li>${n}</li>`).join("")}
-    </ul>` : ""}
-
-    ${p.video ? `
-    <video src="${p.video}" controls playsinline></video>` : ""}
+    ${p.nearby?.length ? `
+      <h4>Lokasi Terdekat</h4>
+      <ul>${p.nearby.map(n=>`<li>${n}</li>`).join("")}</ul>
+    ` : ""}
 
     <div class="cta-group">
-      ${p.mapLink ? `<a href="${p.mapLink}" target="_blank" class="btn">Google Maps</a>` : ""}
+      <a class="btn" onclick="showGallery()">Lihat Foto</a>
+      <a class="btn" onclick="showVideo()">Lihat Video</a>
+    </div>
+
+    <div class="gallery" id="gallery">
+      ${(p.images||[]).map(img=>`<img data-src="${img}">`).join("")}
+    </div>
+
+    <div class="video-box" id="videoBox">
+      ${p.video ? `<video src="${p.video}" controls playsinline></video>` : ""}
+    </div>
+
+    <div class="cta-group">
+      <a href="${p.mapLink}" target="_blank" class="btn">Google Maps</a>
       <a href="${generateWA(p.name)}" target="_blank" class="btn primary">Tanya Unit</a>
     </div>
   `;
 
-  // 🔥 BARU INIT FITUR
   lazyLoadGallery();
   initSwipe();
+}
+
+function showGallery(){
+  document.getElementById("gallery").style.display="flex";
+  document.getElementById("videoBox").style.display="none";
+}
+
+function showVideo(){
+  document.getElementById("videoBox").style.display="block";
+  document.getElementById("gallery").style.display="none";
 }
 
 function closeModal(){
@@ -296,7 +335,39 @@ function closeModal(){
     document.getElementById("modal").classList.remove("active");
     document.body.classList.remove("modal-open");
     sheet.style.transform="";
-  },300);
+  },350);
+}
+
+/* 🔒 SWIPE TIDAK SENSITIF */
+function initSwipe(){
+  const sheet=document.querySelector(".sheet");
+  const body=document.querySelector(".sheet-body");
+  let startY=0, currentY=0, dragging=false;
+
+  sheet.addEventListener("touchstart",e=>{
+    if(body.scrollTop===0){
+      startY=e.touches[0].clientY;
+      dragging=true;
+      sheet.style.transition="none";
+    }
+  });
+
+  sheet.addEventListener("touchmove",e=>{
+    if(!dragging) return;
+    currentY=e.touches[0].clientY;
+    const diff=currentY-startY;
+    if(diff>0){
+      sheet.style.transform=`translate(-50%,${diff*0.6}px)`; // resistance
+    }
+  });
+
+  sheet.addEventListener("touchend",()=>{
+    if(!dragging) return;
+    dragging=false;
+    sheet.style.transition="transform .45s cubic-bezier(.22,.61,.36,1)";
+    const diff=currentY-startY;
+    diff>180 ? closeModal() : sheet.style.transform="translate(-50%,0)";
+  });
 }
 
 function lazyLoadGallery(){
@@ -306,38 +377,10 @@ function lazyLoadGallery(){
   });
 }
 
-function initSwipe(){
-  const sheet=document.querySelector(".sheet");
-  const body=document.querySelector(".sheet-body");
-  let startY=0,drag=false;
-
-  sheet.addEventListener("touchstart",e=>{
-    if(body.scrollTop===0){
-      startY=e.touches[0].clientY;
-      drag=true;
-      sheet.style.transition="none";
-    }
-  });
-
-  sheet.addEventListener("touchmove",e=>{
-    if(!drag) return;
-    const diff=e.touches[0].clientY-startY;
-    if(diff>0) sheet.style.transform=`translate(-50%,${diff}px)`;
-  });
-
-  sheet.addEventListener("touchend",()=>{
-    if(!drag) return;
-    drag=false;
-    sheet.style.transition="transform .45s cubic-bezier(.22,.61,.36,1)";
-    const diff=parseInt(sheet.style.transform.replace(/\D/g,""))||0;
-    diff>120 ? closeModal() : sheet.style.transform="translate(-50%,0)";
-  });
-}
-
 function generateWA(projectName){
-  const phone="6281802168184";
-  const msg=`Halo, saya telah melihat website Dhito Property dan tertarik dengan project ${projectName}.`;
-  return `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+  return `https://wa.me/6281802168184?text=${encodeURIComponent(
+    `Halo, saya telah melihat website Dhito Property dan tertarik dengan project ${projectName}.`
+  )}`;
 }
 </script>
 
