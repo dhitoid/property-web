@@ -17,6 +17,7 @@
 
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
+
 body{
   margin:0;
   font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif;
@@ -48,7 +49,7 @@ nav a{color:var(--muted);margin-left:18px;text-decoration:none}
   text-align:center;
 }
 .hero h1{font-size:44px}
-.hero p{color:var(--muted);max-width:620px;margin:18px 0}
+.hero p{max-width:620px;color:var(--muted);margin:18px 0 32px}
 
 /* BUTTON */
 .btn{
@@ -77,24 +78,42 @@ section{padding:90px 6%}
   transition:.35s;
 }
 .project-card:hover{
-  transform:translateY(-6px);
+  transform:translateY(-8px);
   background:rgba(255,255,255,.14);
 }
 
-/* CONTACT ICON */
-.social-card img{width:22px;height:22px}
+/* CONTACT */
+.social-grid{
+  display:flex;
+  gap:16px;
+  flex-wrap:wrap;
+  margin-top:30px;
+}
+.social-card{
+  width:48px;
+  height:48px;
+  border-radius:50%;
+  background:var(--card);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.social-card img{
+  width:22px;
+  filter:invert(1);
+}
 
 /* MODAL */
 .modal{
   position:fixed;
   inset:0;
   background:rgba(0,0,0,.55);
+  backdrop-filter:blur(10px);
   display:none;
   z-index:100;
 }
 .modal.active{display:block}
 
-/* SHEET */
 .sheet{
   position:absolute;
   left:50%;
@@ -115,6 +134,13 @@ section{padding:90px 6%}
   border-radius:10px;
   margin:12px auto;
 }
+.close{
+  position:absolute;
+  top:14px;
+  right:18px;
+  font-size:22px;
+  cursor:pointer;
+}
 
 .sheet-body{
   max-height:78vh;
@@ -122,29 +148,37 @@ section{padding:90px 6%}
   padding:0 24px 40px;
 }
 
-/* MEDIA */
-.gallery,.video-box{display:none;margin-bottom:20px}
+/* GALLERY */
+.gallery, .video-box{display:none;margin-top:20px}
 .gallery img{
   width:100%;
   height:220px;
   object-fit:cover;
-  border-radius:18px;
+  border-radius:20px;
   opacity:0;
   transform:scale(.98);
-  transition:.4s;
+  transition:.4s ease;
 }
-.gallery img.loaded{opacity:1;transform:scale(1)}
-video{width:100%;border-radius:18px}
+.gallery img.loaded{
+  opacity:1;
+  transform:scale(1);
+}
+
+video{
+  width:100%;
+  border-radius:20px;
+}
 
 /* CTA */
-.cta-group{display:flex;gap:12px;flex-wrap:wrap}
-.cta-group a{flex:1;text-align:center}
-
-/* CONTACT */
-.social-grid{
+.cta-group{
   display:flex;
-  gap:18px;
+  gap:12px;
+  margin-top:20px;
   flex-wrap:wrap;
+}
+.cta-group a{
+  flex:1;
+  text-align:center;
 }
 
 @media(max-width:600px){
@@ -159,14 +193,15 @@ video{width:100%;border-radius:18px}
 <nav>
   <strong>Dhito Property</strong>
   <div>
+    <a href="#home">Home</a>
     <a href="#project">Project</a>
     <a href="#contact">Kontak</a>
   </div>
 </nav>
 
-<section class="hero">
+<section id="home" class="hero">
   <h1>Marketing Property Profesional & Terpercaya</h1>
-  <p>Membantu Anda mendapatkan rumah impian dengan proses aman.</p>
+  <p>Membantu Anda mendapatkan rumah impian dengan proses aman dan transparan.</p>
   <a href="#project" class="btn primary">Lihat Project</a>
 </section>
 
@@ -178,19 +213,20 @@ video{width:100%;border-radius:18px}
 <section id="contact">
   <h2>Hubungi Saya</h2>
   <div class="social-grid">
-    <a href="https://wa.me/6281802168184" class="btn">WA</a>
-    <a href="https://instagram.com/dhitoproperty.id" class="btn">IG</a>
-    <a href="https://tiktok.com/@dhitopropertyid" class="btn">TikTok</a>
-    <a href="mailto:dhitoproperty@gmail.com" class="btn">Email</a>
+    <a href="https://wa.me/6281802168184" class="social-card"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/whatsapp.svg"></a>
+    <a href="https://instagram.com/dhitoproperty.id" class="social-card"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/instagram.svg"></a>
+    <a href="https://www.tiktok.com/@dhitopropertyid" class="social-card"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/tiktok.svg"></a>
+    <a href="mailto:dhitoproperty@gmail.com" class="social-card"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/gmail.svg"></a>
   </div>
 </section>
 
-<footer>© 2026 Nour Maandhito</footer>
+<footer>© 2026 Nour Maandhito — Marketing Property</footer>
 
 <!-- MODAL -->
 <div id="modal" class="modal">
   <div class="sheet">
     <div class="sheet-handle"></div>
+    <span class="close" onclick="closeModal()">✕</span>
     <div class="sheet-body" id="modalBody"></div>
   </div>
 </div>
@@ -221,9 +257,9 @@ function openModal(i){
   const p=projects[i];
   document.body.classList.add("modal-open");
 
-  modalBody.innerHTML=`
+  document.getElementById("modalBody").innerHTML=`
     <h2>${p.name}</h2>
-    <p style="color:var(--muted)">📍 ${p.location}</p>
+    <p style="color:var(--muted)">📍 ${p.location} • 💰 ${p.price}</p>
 
     <div class="cta-group">
       <a class="btn" onclick="showGallery()">Lihat Foto</a>
@@ -244,18 +280,28 @@ function openModal(i){
     </div>
   `;
 
-  modal.classList.add("active");
+  document.getElementById("modal").classList.add("active");
   lazyLoadGallery();
   initSwipe();
 }
 
 function showGallery(){
-  gallery.style.display="block";
-  videoBox.style.display="none";
+  document.getElementById("gallery").style.display="block";
+  document.getElementById("videoBox").style.display="none";
 }
 function showVideo(){
-  videoBox.style.display="block";
-  gallery.style.display="none";
+  document.getElementById("videoBox").style.display="block";
+  document.getElementById("gallery").style.display="none";
+}
+
+function closeModal(){
+  const sheet=document.querySelector(".sheet");
+  sheet.style.transform="translate(-50%,100%)";
+  setTimeout(()=>{
+    document.getElementById("modal").classList.remove("active");
+    document.body.classList.remove("modal-open");
+    sheet.style.transform="";
+  },300);
 }
 
 function lazyLoadGallery(){
@@ -279,22 +325,24 @@ function initSwipe(){
   });
 
   sheet.addEventListener("touchmove",e=>{
-    if(!drag)return;
+    if(!drag) return;
     const diff=e.touches[0].clientY-startY;
     if(diff>0) sheet.style.transform=`translate(-50%,${diff}px)`;
   });
 
   sheet.addEventListener("touchend",()=>{
+    if(!drag) return;
     drag=false;
     sheet.style.transition="transform .45s cubic-bezier(.22,.61,.36,1)";
-    sheet.style.transform="translate(-50%,0)";
+    const diff=parseInt(sheet.style.transform.replace(/\D/g,""))||0;
+    diff>120 ? closeModal() : sheet.style.transform="translate(-50%,0)";
   });
 }
 
-function generateWA(project){
-  return `https://wa.me/6281802168184?text=${encodeURIComponent(
-    "Halo, saya tertarik dengan rumah di"+project
-  )}`;
+function generateWA(projectName){
+  const phone="6281802168184";
+  const msg=`Halo, saya telah melihat website Dhito Property dan tertarik dengan project ${projectName}.`;
+  return `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
 }
 </script>
 
