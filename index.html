@@ -751,6 +751,70 @@ footer{
   font-weight:600;
 }
 
+/* ===== CUSTOM SELECT ===== */
+.custom-select{
+  position:relative;
+  margin-top:6px;
+  user-select:none;
+}
+
+.select-display{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px 14px;
+  border-radius:12px;
+  background:#111;
+  border:1px solid #222;
+  cursor:pointer;
+  transition:.25s;
+}
+
+.select-display:hover{
+  border-color:#444;
+}
+
+.custom-select.open .select-display svg{
+  transform:rotate(180deg);
+}
+
+.select-options{
+  position:absolute;
+  top:110%;
+  left:0;
+  right:0;
+  background:#0d0d0d;
+  border:1px solid #222;
+  border-radius:14px;
+  overflow:hidden;
+  opacity:0;
+  transform:translateY(-8px);
+  pointer-events:none;
+  transition:.25s;
+  z-index:20;
+}
+
+.custom-select.open .select-options{
+  opacity:1;
+  transform:translateY(0);
+  pointer-events:auto;
+}
+
+.option{
+  padding:12px 14px;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.option:hover{
+  background:#1a1a1a;
+}
+
+.option.active{
+  background:#222;
+  font-weight:600;
+}
+
 </style>
 </head>
 
@@ -972,14 +1036,24 @@ function openModal(i){
       <h4>Simulasi Cicilan</h4>
 
       <label>DP (<span id="dpValue">20%</span>)</label>
-      <input type="range" id="dpRange" min="10" max="50" value="20">
+      <input type="range" id="dpRange" min="5" max="50" value="25">
 
-      <label>Tenor</label>
-      <select id="tenorSelect">
-        <option value="10">10 Tahun</option>
-        <option value="15">15 Tahun</option>
-        <option value="20">20 Tahun</option>
-      </select>
+<label>Tenor</label>
+<div class="custom-select" id="tenorSelect" data-value="15">
+  <div class="select-display">
+    <span id="tenorLabel">15 Tahun</span>
+    <svg width="14" height="14" viewBox="0 0 24 24">
+      <path d="M7 10l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2"/>
+    </svg>
+  </div>
+
+  <div class="select-options">
+    <div class="option" data-value="10">10 Tahun</div>
+    <div class="option active" data-value="15">15 Tahun</div>
+    <div class="option" data-value="20">20 Tahun</div>
+    <div class="option" data-value="25">25 Tahun</div>
+  </div>
+</div>
 
       <div class="cicilan-result">
         Estimasi Cicilan:
@@ -1015,18 +1089,51 @@ function openModal(i){
 
 function initCicilan(){
   const dpRange   = document.getElementById("dpRange");
-  const tenorSel  = document.getElementById("tenorSelect");
   const dpValue   = document.getElementById("dpValue");
   const cicilanEl = document.getElementById("cicilanValue");
   const waBtn     = document.getElementById("modalWA");
 
-  function hitung(){
-    const price = currentProject.priceValue; // angka murni
-    const dp    = dpRange.value / 100;
-    const tenor = tenorSel.value * 12;
-    const bunga = 0.1 / 12; // estimasi 10% / tahun
+  const select    = document.getElementById("tenorSelect");
+  const label     = document.getElementById("tenorLabel");
+  const options   = select.querySelectorAll(".option");
 
-    const loan = price * (1 - dp);
+  let tenorYear = parseInt(select.dataset.value);
+
+  /* ===== CUSTOM SELECT UX ===== */
+  select.querySelector(".select-display").onclick = () => {
+    select.classList.toggle("open");
+  };
+
+  options.forEach(opt=>{
+    opt.onclick = ()=>{
+      options.forEach(o=>o.classList.remove("active"));
+      opt.classList.add("active");
+
+      tenorYear = parseInt(opt.dataset.value);
+      select.dataset.value = tenorYear;
+      label.textContent = opt.textContent;
+
+      select.classList.remove("open");
+      hitung();
+    };
+  });
+
+  document.addEventListener("click", e=>{
+    if(!select.contains(e.target)){
+      select.classList.remove("open");
+    }
+  });
+
+  function hitung(){
+    const price = currentProject.priceValue;
+    if(!price) return;
+
+    const dpPercent = dpRange.value / 100;
+    const tenor     = tenorYear * 12;
+    const bunga     = 0.10 / 12;
+
+    const loan = price * (1 - dpPercent);
+
     const angs =
       (loan * bunga) /
       (1 - Math.pow(1 + bunga, -tenor));
@@ -1036,17 +1143,14 @@ function initCicilan(){
       "Rp " + Math.round(angs).toLocaleString("id-ID");
 
     waBtn.href =
-      `https://wa.me/6281802168184?text=${
-        encodeURIComponent(
-          `Halo, saya tertarik dengan ${currentProject.name}
-DP ${dpRange.value}% • Tenor ${tenorSel.value} tahun
+      `https://wa.me/6281802168184?text=${encodeURIComponent(
+        `Halo, saya tertarik dengan ${currentProject.name}
+DP ${dpRange.value}% • Tenor ${tenorYear} tahun
 Estimasi cicilan ${cicilanEl.textContent}`
-        )
-      }`;
+      )}`;
   }
 
   dpRange.addEventListener("input", hitung);
-  tenorSel.addEventListener("change", hitung);
   hitung();
 }
 
