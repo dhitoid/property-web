@@ -811,7 +811,7 @@ function openFullscreen(type,start,files){
   files.forEach((file,i)=>{
     const wrap = document.createElement("div");
     wrap.className="fs-item";
-    const src = currentProject.folder + file;
+    const src = getSrc(file);
 
     if(type==="photo"){
       const img = document.createElement("img");
@@ -819,11 +819,11 @@ function openFullscreen(type,start,files){
       enableZoom(img);
       wrap.appendChild(img);
     }else{
-      const v = document.createElement("video");
-      v.src = src;
-      v.controls = true;
-      v.playsInline = true;
-      wrap.appendChild(v);
+const v = document.createElement("video");
+v.src = src;
+v.controls = true;
+v.playsInline = true;
+v.preload = "metadata";
     }
 
     track.appendChild(wrap);
