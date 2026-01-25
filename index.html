@@ -1183,6 +1183,16 @@ function initFullscreenSwipe(type){
 /* ================= WA STICKY BEHAVIOR ================= */
 let lastScrollY = window.scrollY;
 const waSticky = document.getElementById("waSticky");
+const waLink   = document.getElementById("waStickyLink");
+
+function updateWAContext(){
+  const text = currentProject
+    ? `Halo, saya tertarik dengan project ${currentProject.name}.`
+    : `Halo, saya ingin tanya info rumah.`;
+
+  waLink.href =
+    `https://wa.me/6281802168184?text=${encodeURIComponent(text)}`;
+}
 
 window.addEventListener("scroll",()=>{
   const currentY = window.scrollY;
@@ -1195,20 +1205,13 @@ window.addEventListener("scroll",()=>{
 
   lastScrollY = currentY;
 });
+
+/* update context saat user klik apa pun */
+document.addEventListener("click", updateWAContext);
 </script>
 <!-- STICKY WHATSAPP CTA -->
 <div id="waSticky" class="wa-sticky">
-  const waLink = document.getElementById("waStickyLink");
-
-function updateWAContext(){
-  const text = currentProject
-    ? `Halo, saya tertarik dengan project ${currentProject.name}.`
-    : `Halo, saya ingin tanya info rumah.`;
-
-  waLink.href = `https://wa.me/6281802168184?text=${encodeURIComponent(text)}`;
-}
-
-document.addEventListener("click",updateWAContext);
+  <a id="waStickyLink" target="_blank">
     <span class="wa-icon">💬</span>
     <span class="wa-text">Chat WhatsApp</span>
   </a>
