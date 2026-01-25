@@ -847,65 +847,54 @@ function openFullscreen(type,start,files){
   const track = document.getElementById("fsTrack");
   const dots  = document.getElementById("fsDots");
 
-  track.innerHTML="";
-  dots.innerHTML="";
+  track.innerHTML = "";
+  dots.innerHTML  = "";
 
   fsItems = files;
   fsIndex = start;
 
   files.forEach((file,i)=>{
     const wrap = document.createElement("div");
-    wrap.className="fs-item";
+    wrap.className = "fs-item";
+
     const src = getSrc(file);
 
-    if(type==="photo"){
+    if(type === "photo"){
       const img = document.createElement("img");
       img.src = src;
       enableZoom(img);
       wrap.appendChild(img);
     }else{
-const v = document.createElement("video");
-v.src = src;
-v.controls = false;     // ❌ hilangin UI play
-v.poster = "";          // ❌ hilangin thumbnail
-v.preload = "auto";
-v.playsInline = false;  // 🔥 penting
-v.muted = false;
+      const v = document.createElement("video");
+      v.src = src;
+      v.preload = "auto";
+      v.playsInline = false;
+      v.controls = false;
+      wrap.appendChild(v);
 
-v.style.width = "100%";
-v.style.height = "100%";
-v.style.objectFit = "contain";
-v.style.background = "#000";
-
-// 🔥 1 TAP → PLAY + FULLSCREEN
-v.addEventListener("click", () => {
-  v.play();
-
-  // ANDROID
-  if (v.requestFullscreen) {
-    v.requestFullscreen();
-  }
-  // IOS SAFARI
-  else if (v.webkitEnterFullscreen) {
-    v.webkitEnterFullscreen();
-  }
-});
-
-wrap.appendChild(v);
-
+      // autoplay saat slide aktif
+      if(i === fsIndex){
+        setTimeout(()=>v.play().catch(()=>{}),200);
+      }
     }
 
     track.appendChild(wrap);
 
-    const dot=document.createElement("span");
-    if(i===fsIndex) dot.classList.add("active");
+    // DOT
+    const dot = document.createElement("span");
+    if(i === fsIndex) dot.classList.add("active");
     dots.appendChild(dot);
   });
 
-  track.style.transform=`translateX(-${fsIndex*100}%)`;
+  track.style.transition = "none";
+  track.style.transform  = `translateX(-${fsIndex * 100}%)`;
+
   fs.classList.add("active");
 
   initFullscreenSwipe(type);
+  updateDots();           // 🔥 WAJIB
+  showDots();             // 🔥 WAJIB
+
   setTimeout(hideSplash,300);
 }
 
