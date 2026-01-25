@@ -14,7 +14,9 @@
       "gpr3.WEBP",
       "gpr4.WEBP",
       "https://res.cloudinary.com/dvpoxkbcl/video/upload/v1769293018/copy_FD28F6E3-85F9-4908-BB22-B7CDDDE18472_a3ydhr.mp4",
-      "https://res.cloudinary.com/dvpoxkbcl/video/upload/v1769346334/copy_6FC315F8-64F1-4EB1-9C08-51C6E5CB143D_feie9f.mp4"
+      "https://res.cloudinary.com/dvpoxkbcl/video/upload/v1769346334/copy_6FC315F8-64F1-4EB1-9C08-51C6E5CB143D_feie9f.mp4",
+      "https://res.cloudinary.com/dvpoxkbcl/video/upload/v1769347050/650b6ad2-f979-4577-b28e-09de88d99afe_nlvtsu.mp4",
+      "https://res.cloudinary.com/dvpoxkbcl/video/upload/v1769347136/e22e7fe3-1c4a-4204-9cb0-3ea073c5e112_xrclkg.mp4"
     ],
 
     "nearby": [
@@ -33,14 +35,16 @@
     "price": "Mulai 2 Jutaan",
 
     "description": "Grand Duta Pakis menghadirkan hunian minimalis modern dengan lingkungan tenang dan sistem keamanan one gate. Proses KPR mudah dan legalitas aman.",
-    "folder": "assets/gpr/",
+    "folder": "assets/gdp/",
     "media": [
       "brosur.JPEG",
       "spekgpr.JPEG",
       "gpr1.WEBP",
       "gpr2.WEBP",
       "gpr3.WEBP",
-      "gpr4.WEBP"
+      "gpr4.WEBP",
+      "https://res.cloudinary.com/dvpoxkbcl/video/upload/v1769347142/30dce1f2-6b39-4cab-9df5-bba98d69c985_hynizi.mp4",
+      "https://res.cloudinary.com/dvpoxkbcl/video/upload/v1769347140/e51e72be-1e69-416c-9c08-6e7a9f1a8e9e_zchdpm.mp4"
     ],
 
     "nearby": [
