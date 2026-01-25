@@ -1349,10 +1349,6 @@ function applyProjectFilter(type){
     card.innerHTML = `
       <span class="status ${p.status || 'ready'}">${(p.status || 'READY').toUpperCase()}</span>
       <h3>${p.name}</h3>
-      <p style="color:var(--muted)">
-        📍 ${p.location}<br>
-        💰 ${p.price}
-      </p>
     `;
     card.onclick = () => openModal(projects.indexOf(p));
     grid.appendChild(card);
