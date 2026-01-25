@@ -501,6 +501,59 @@ footer{
   pointer-events:none;
 }
 
+/* ================= WHY SECTION ================= */
+.why{
+  text-align:center;
+}
+
+.why h2{
+  font-size:28px;
+  margin-bottom:10px;
+}
+
+.why-desc{
+  max-width:680px;
+  margin:0 auto 36px;
+  color:var(--muted);
+  font-size:15px;
+}
+
+.why-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:22px;
+}
+
+.why-card{
+  background:linear-gradient(
+    180deg,
+    rgba(255,255,255,.14),
+    rgba(255,255,255,.06)
+  );
+  backdrop-filter:var(--blur);
+  border-radius:22px;
+  padding:26px 20px;
+  text-align:left;
+  transition:.35s ease;
+}
+
+.why-card strong{
+  display:block;
+  font-size:15px;
+  margin-bottom:6px;
+}
+
+.why-card span{
+  font-size:13px;
+  color:var(--muted);
+  line-height:1.5;
+}
+
+.why-card:hover{
+  transform:translateY(-6px);
+  background:rgba(255,255,255,.18);
+}
+
 </style>
 </head>
 
@@ -522,6 +575,35 @@ footer{
   <h1>Marketing Property Profesional & Terpercaya</h1>
   <p>Membantu Anda mendapatkan rumah impian dengan proses aman dan transparan.</p>
   <a href="#project" class="btn primary">Lihat Project</a>
+</section>
+
+<section id="why" class="why">
+  <h2>Kenapa Dhito Property?</h2>
+  <p class="why-desc">
+    Kami tidak hanya menjual rumah, tapi mendampingi Anda dari awal hingga serah terima dengan proses yang aman dan transparan.
+  </p>
+
+  <div class="why-grid">
+    <div class="why-card">
+      <strong>Legal Aman</strong>
+      <span>Sertifikat & dokumen jelas</span>
+    </div>
+
+    <div class="why-card">
+      <strong>Proses Transparan</strong>
+      <span>Harga & info tanpa ditutup-tutupi</span>
+    </div>
+
+    <div class="why-card">
+      <strong>Pendampingan Penuh</strong>
+      <span>Dari survey sampai akad</span>
+    </div>
+
+    <div class="why-card">
+      <strong>After Sales</strong>
+      <span>Tetap dibantu setelah serah terima</span>
+    </div>
+  </div>
 </section>
 
 <section id="project">
