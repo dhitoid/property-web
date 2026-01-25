@@ -191,6 +191,46 @@ section{
   background:rgba(255,255,255,.16);
 }
 
+/* ================= PROJECT STATUS ================= */
+.status{
+  position:absolute;
+  top:18px;
+  left:18px;
+  padding:6px 14px;
+  border-radius:20px;
+  font-size:11px;
+  font-weight:600;
+  letter-spacing:.5px;
+  backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,.35);
+}
+
+/* READY */
+.status.ready{
+  background:rgba(45, 220, 120, .25);
+  color:#baffd9;
+  box-shadow:0 0 18px rgba(45,220,120,.25);
+}
+
+/* BOOKING */
+.status.booking{
+  background:rgba(255, 180, 60, .25);
+  color:#ffe2a8;
+  box-shadow:0 0 18px rgba(255,180,60,.25);
+}
+
+/* SOLD */
+.status.sold{
+  background:rgba(255, 80, 80, .22);
+  color:#ffc1c1;
+  box-shadow:0 0 18px rgba(255,80,80,.22);
+  opacity:.85;
+}
+
+.project-card:has(.status.sold){
+  opacity:.75;
+}
+
 /* ================= CONTACT ================= */
 #contact{text-align:center}
 
@@ -686,12 +726,13 @@ function renderProjects(){
     const card = document.createElement("div");
     card.className = "project-card";
     card.innerHTML = `
-      <h3>${p.name}</h3>
-      <p style="color:var(--muted)">
-        📍 ${p.location}<br>
-        💰 ${p.price}
-      </p>
-    `;
+  <span class="status ${p.status || 'ready'}">${(p.status || 'READY').toUpperCase()}</span>
+  <h3>${p.name}</h3>
+  <p style="color:var(--muted)">
+    📍 ${p.location}<br>
+    💰 ${p.price}
+  </p>
+`;
     card.onclick = () => openModal(i);
     grid.appendChild(card);
   });
