@@ -665,30 +665,60 @@ function openMedia(type){
   const grid  = document.getElementById("mediaGrid");
   const title = document.getElementById("mediaTitle");
 
-  grid.innerHTML="";
-  title.innerText = type==="photo" ? "Foto Project" : "Video Project";
+  grid.innerHTML = "";
+  title.innerText = type === "photo" ? "Foto Project" : "Video Project";
 
   const files = (currentProject.media || [])
-    .filter(f => type==="photo" ? isImage(f) : isVideo(f));
+    .filter(f => type === "photo" ? isImage(f) : isVideo(f));
 
-  files.forEach((file,i)=>{
-  const fullPath = getSrc(file);
-  let el;
+  files.forEach((file, i) => {
+    const fullPath = getSrc(file);
+    let el;
 
-  if(type==="photo"){
-    el = document.createElement("img");
-    el.src = fullPath;
-  }else{
-  el = document.createElement("video");
-  el.src = fullPath;
-  el.controls = true;        // 🔥 WAJIB
-  el.playsInline = true;     // 🔥 iOS fix
-  el.preload = "metadata";
-}
+    /* ======================
+       📸 FOTO → CUSTOM FS
+       ====================== */
+    if(type === "photo"){
+      el = document.createElement("img");
+      el.src = fullPath;
 
-  el.onclick = ()=>openFullscreen(type, i, files);
-  grid.appendChild(el);
-});
+      el.onclick = () => openFullscreen("photo", i, files);
+    }
+
+    /* ======================
+       🎥 VIDEO → NATIVE FS
+       ====================== */
+    else{
+      el = document.createElement("video");
+      el.src = fullPath;
+
+      // 🔥 SETUP PALING AMAN
+      el.controls = false;       // hilangin play icon palsu
+      el.poster = "";            // no thumbnail
+      el.preload = "metadata";
+      el.playsInline = false;    // WAJIB agar fullscreen
+      el.muted = false;
+
+      el.style.width = "100%";
+      el.style.background = "#000";
+
+      // 🔥 1 TAP → PLAY + FULLSCREEN
+      el.addEventListener("click", () => {
+        el.play().then(() => {
+          // iOS
+          if (el.webkitEnterFullscreen) {
+            el.webkitEnterFullscreen();
+          }
+          // Android
+          else if (el.requestFullscreen) {
+            el.requestFullscreen();
+          }
+        }).catch(()=>{});
+      });
+    }
+
+    grid.appendChild(el);
+  });
 
   popup.classList.add("active");
 }
