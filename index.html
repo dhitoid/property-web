@@ -917,35 +917,37 @@ function updateDots(){
 }
 
 function initFullscreenSwipe(type){
-  const track=document.getElementById("fsTrack");
-  let startX=0,currentX=0;
+  const track = document.getElementById("fsTrack");
 
-  track.onpointerdown=e=>{
-    startX=e.clientX;
-    currentX=e.clientX;
-    track.style.transition="none";
+  let startX = 0;
+  let diffX  = 0;
+  let dragging = false;
+
+  track.onpointerdown = e=>{
+    dragging = true;
+    startX = e.clientX;
+    diffX  = 0;
+    track.setPointerCapture(e.pointerId);
+    track.style.transition = "none";
   };
 
-  track.onpointermove=e=>{
-    if(startX===null) return;
-    currentX=e.clientX;
-    const diff=currentX-startX;
-    track.style.transform=`translateX(calc(-${fsIndex*100}% + ${diff}px))`;
+  track.onpointermove = e=>{
+    if(!dragging) return;
+    diffX = e.clientX - startX;
+    track.style.transform =
+      `translateX(calc(-${fsIndex * 100}% + ${diffX}px))`;
   };
 
-  track.onpointerup=()=>{
-    const diff=currentX-startX;
-    track.style.transition="transform .35s cubic-bezier(.22,.61,.36,1)";
+  track.onpointerup = ()=>{
+    dragging = false;
+    track.style.transition = "transform .35s cubic-bezier(.22,.61,.36,1)";
 
-    if(diff < -80 && fsIndex < fsItems.length-1) fsIndex++;
-    if(diff > 80 && fsIndex > 0) fsIndex--;
+    if(diffX < -80 && fsIndex < fsItems.length - 1) fsIndex++;
+    if(diffX >  80 && fsIndex > 0) fsIndex--;
 
-    track.style.transform=`translateX(-${fsIndex*100}%)`;
+    track.style.transform = `translateX(-${fsIndex * 100}%)`;
 
-    updateDots(); // 🔥 INI KUNCI NYA
-
-    startX=null;
-    currentX=0;
+    updateDots();
   };
 
   track.onpointercancel = track.onpointerup;
