@@ -678,11 +678,9 @@ function openMedia(type){
     /* ======================
        📸 FOTO → CUSTOM FS
        ====================== */
-    if(type === "photo"){
-      el = document.createElement("img");
-      el.src = fullPath;
-
-      el.onclick = () => openFullscreen("photo", i, files);
+    if(type==="photo"){
+    el = document.createElement("img");
+    el.src = fullPath;
     }
 
     /* ======================
