@@ -161,17 +161,18 @@ section{
 }
 
 .project-card{
-  position:relative;
-  background:linear-gradient(
-    180deg,
-    rgba(255,255,255,.12),
-    rgba(255,255,255,.05)
-  );
-  border-radius:26px;
-  padding:22px;
+  padding:26px 22px;
+  border-radius:18px;
+  background:rgba(255,255,255,.08);
+  backdrop-filter:var(--blur);
+  border:1px solid rgba(255,255,255,.15);
+  transition:.35s ease;
   cursor:pointer;
-  transition:.35s;
-  overflow:hidden;
+}
+
+.project-card:hover{
+  transform:translateY(-6px);
+  box-shadow:0 12px 40px rgba(0,0,0,.4);
 }
 
 /* LOGO DI KANAN PROJECT (TANPA JS) */
@@ -184,11 +185,6 @@ section{
   height:34px;
   background:url("assets/logo-mark.png") center/contain no-repeat;
   opacity:.55;
-}
-
-.project-card:hover{
-  transform:translateY(-6px);
-  background:rgba(255,255,255,.16);
 }
 
 /* ================= PROJECT STATUS ================= */
@@ -719,6 +715,24 @@ footer{
   transform:translateY(-2px);
 }
 
+.price-box{
+  margin:14px 0 20px;
+  font-size:18px;
+}
+
+.cicilan-box{
+  margin:20px 0;
+  padding:18px;
+  border-radius:16px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.15);
+}
+
+.cicilan-result{
+  margin-top:14px;
+  font-size:14px;
+}
+
 </style>
 </head>
 
@@ -865,18 +879,15 @@ function renderProjects(){
     const card = document.createElement("div");
     card.className = "project-card";
     card.innerHTML = `
-  <span class="status ${p.status || 'ready'}">${(p.status || 'READY').toUpperCase()}</span>
-  <h3>${p.name}</h3>
-  <p style="color:var(--muted)">
-    📍 ${p.location}<br>
-    💰 ${p.price}
-  </p>
-`;
-    card.onclick = () => openModal(i);
+      <span class="status ${p.status || 'ready'}">
+        ${(p.status || 'READY').toUpperCase()}
+      </span>
+      <h3>${p.name}</h3>
+    `;
+    card.onclick = ()=> openModal(i);
     grid.appendChild(card);
   });
 }
-
 
 /* =========================
    UTILITIES
@@ -911,7 +922,7 @@ function enableZoom(img){
 
 
 /* =========================
-   MODAL OPEN
+   MODAL OPEN (UPGRADED)
    ========================= */
 function openModal(i){
   const p = projects[i];
@@ -922,11 +933,41 @@ function openModal(i){
 
   document.getElementById("modalBody").innerHTML = `
     <h2>${p.name}</h2>
-    <p style="color:var(--muted)">
-      📍 ${p.location} • 💰 ${p.price}
+
+    <span class="status ${p.status || 'ready'}">
+      ${(p.status || 'READY').toUpperCase()}
+    </span>
+
+    <p class="muted">
+      📍 ${p.location}
     </p>
 
-    <p>${p.description || ""}</p>
+    ${p.description ? `<p>${p.description}</p>` : ""}
+
+    <!-- PRICE -->
+    <div class="price-box">
+      <strong>${p.price}</strong>
+    </div>
+
+    <!-- SIMULASI CICILAN -->
+    <div class="cicilan-box">
+      <h4>Simulasi Cicilan</h4>
+
+      <label>DP (<span id="dpValue">20%</span>)</label>
+      <input type="range" id="dpRange" min="10" max="50" value="20">
+
+      <label>Tenor</label>
+      <select id="tenorSelect">
+        <option value="10">10 Tahun</option>
+        <option value="15">15 Tahun</option>
+        <option value="20">20 Tahun</option>
+      </select>
+
+      <div class="cicilan-result">
+        Estimasi Cicilan:
+        <strong id="cicilanValue">-</strong> / bulan
+      </div>
+    </div>
 
     ${p.nearby?.length ? `
       <h4>Lokasi Terdekat</h4>
@@ -946,13 +987,50 @@ function openModal(i){
 
     <div class="cta-group bottom">
       <a href="${p.mapLink}" target="_blank" class="btn">Google Maps</a>
-      <a href="${generateWA(p.name)}" target="_blank" class="btn primary">Tanya Unit</a>
+      <a id="modalWA" target="_blank" class="btn primary">Konsultasi WhatsApp</a>
     </div>
   `;
 
   initSwipe();
+  initCicilan();
 }
 
+function initCicilan(){
+  const dpRange   = document.getElementById("dpRange");
+  const tenorSel  = document.getElementById("tenorSelect");
+  const dpValue   = document.getElementById("dpValue");
+  const cicilanEl = document.getElementById("cicilanValue");
+  const waBtn     = document.getElementById("modalWA");
+
+  function hitung(){
+    const price = currentProject.priceValue; // angka murni
+    const dp    = dpRange.value / 100;
+    const tenor = tenorSel.value * 12;
+    const bunga = 0.1 / 12; // estimasi 10% / tahun
+
+    const loan = price * (1 - dp);
+    const angs =
+      (loan * bunga) /
+      (1 - Math.pow(1 + bunga, -tenor));
+
+    dpValue.textContent = dpRange.value + "%";
+    cicilanEl.textContent =
+      "Rp " + Math.round(angs).toLocaleString("id-ID");
+
+    waBtn.href =
+      `https://wa.me/6281802168184?text=${
+        encodeURIComponent(
+          `Halo, saya tertarik dengan ${currentProject.name}
+DP ${dpRange.value}% • Tenor ${tenorSel.value} tahun
+Estimasi cicilan ${cicilanEl.textContent}`
+        )
+      }`;
+  }
+
+  dpRange.addEventListener("input", hitung);
+  tenorSel.addEventListener("change", hitung);
+  hitung();
+}
 
 /* =========================
    MEDIA ENTRY POINT
