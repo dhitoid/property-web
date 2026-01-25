@@ -580,6 +580,10 @@ function renderProjects(){
   });
 }
 
+function getSrc(file){
+  return file.startsWith("http") ? file : currentProject.folder + file;
+}
+
 function openModal(i){
   const p=projects[i];
   currentProject=p;
@@ -656,22 +660,23 @@ function openMedia(type){
     .filter(f => type==="photo" ? isImage(f) : isVideo(f));
 
   files.forEach((file,i)=>{
-    const fullPath = currentProject.folder + file;
-    let el;
+  const fullPath = getSrc(file);
+  let el;
 
-    if(type==="photo"){
-      el = document.createElement("img");
-      el.src = fullPath;
-    }else{
-      el = document.createElement("video");
-      el.src = fullPath;
-      el.muted = true;
-      el.playsInline = true;
-    }
+  if(type==="photo"){
+    el = document.createElement("img");
+    el.src = fullPath;
+  }else{
+    el = document.createElement("video");
+    el.src = fullPath;
+    el.muted = true;
+    el.playsInline = true;
+    el.preload = "metadata";
+  }
 
-    el.onclick = ()=>openFullscreen(type, i, files);
-    grid.appendChild(el);
-  });
+  el.onclick = ()=>openFullscreen(type, i, files);
+  grid.appendChild(el);
+});
 
   popup.classList.add("active");
 }
@@ -771,8 +776,14 @@ fullscreenEl.addEventListener("click",(e)=>{
 const IMAGE_EXT = /\.(JPG|JPEG|PNG|WEBP|GIF)$/i;
 const VIDEO_EXT = /\.(mp4|webm|ogg|mov)$/i;
 
-function isImage(src){ return IMAGE_EXT.test(src); }
-function isVideo(src){ return VIDEO_EXT.test(src); }
+function isImage(src){
+  return IMAGE_EXT.test(src.toLowerCase());
+}
+
+function isVideo(src){
+  return VIDEO_EXT.test(src.toLowerCase()) || src.includes("cloudinary.com");
+}
+
 
 function showDots(){
   const dots=document.getElementById("fsDots");
