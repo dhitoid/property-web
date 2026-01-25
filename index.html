@@ -688,6 +688,37 @@ footer{
   .wa-sticky{display:none}
 }
 
+/* ================= PROJECT FILTER ================= */
+.project-filter{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin:22px 0 32px;
+}
+
+.filter-btn{
+  padding:10px 18px;
+  border-radius:20px;
+  font-size:13px;
+  font-weight:500;
+  color:var(--muted);
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.2);
+  backdrop-filter:var(--blur);
+  cursor:pointer;
+  transition:.3s ease;
+}
+
+.filter-btn.active{
+  color:white;
+  background:rgba(255,255,255,.22);
+  box-shadow:0 0 18px rgba(255,255,255,.25);
+}
+
+.filter-btn:hover{
+  transform:translateY(-2px);
+}
+
 </style>
 </head>
 
@@ -742,6 +773,12 @@ footer{
 
 <section id="project">
   <h2>Project Rumah</h2>
+  <div class="project-filter">
+  <button class="filter-btn active" data-filter="all">Semua</button>
+  <button class="filter-btn" data-filter="ready">Ready</button>
+  <button class="filter-btn" data-filter="booking">Booking</button>
+  <button class="filter-btn" data-filter="sold">Sold</button>
+</div>
   <div id="projectGrid" class="project-grid"></div>
 </section>
 
@@ -1188,7 +1225,55 @@ function initFullscreenSwipe(type){
   track.onpointercancel = track.onpointerup;
 }
 
-/* ================= WA STICKY BEHAVIOR ================= */
+/* ================= PROJECT FILTER LOGIC ================= */
+const filterButtons = document.querySelectorAll(".filter-btn");
+
+filterButtons.forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    filterButtons.forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+
+    const type = btn.dataset.filter;
+    applyProjectFilter(type);
+  });
+});
+
+function applyProjectFilter(type){
+  const grid = document.getElementById("projectGrid");
+  grid.innerHTML = "";
+
+  const filtered =
+    type === "all"
+      ? projects
+      : projects.filter(p => (p.status || "ready") === type);
+
+  filtered.forEach((p,i)=>{
+    const card = document.createElement("div");
+    card.className = "project-card";
+    card.innerHTML = `
+      <span class="status ${p.status || 'ready'}">${(p.status || 'READY').toUpperCase()}</span>
+      <h3>${p.name}</h3>
+      <p style="color:var(--muted)">
+        📍 ${p.location}<br>
+        💰 ${p.price}
+      </p>
+    `;
+    card.onclick = () => openModal(projects.indexOf(p));
+    grid.appendChild(card);
+  });
+}
+
+window.addEventListener("scroll",()=>{
+  if(window.scrollY < 80){
+    const defaultFilter =
+      document.querySelector('.filter-btn[data-filter="all"]');
+    if(defaultFilter && !defaultFilter.classList.contains("active")){
+      defaultFilter.click();
+    }
+  }
+});
+
+/* ================= WA STICKY BEHAVIOR (IMPROVED) ================= */
 let lastScrollY = window.scrollY;
 const waSticky = document.getElementById("waSticky");
 const waLink   = document.getElementById("waStickyLink");
@@ -1204,8 +1289,9 @@ function updateWAContext(){
 
 window.addEventListener("scroll",()=>{
   const currentY = window.scrollY;
+  const trigger  = window.innerHeight * 0.6; // 🔥 muncul lebih awal
 
-  if(currentY > 300 && currentY < lastScrollY){
+  if(currentY > trigger && currentY < lastScrollY){
     waSticky.classList.add("show");
   }else{
     waSticky.classList.remove("show");
@@ -1214,7 +1300,6 @@ window.addEventListener("scroll",()=>{
   lastScrollY = currentY;
 });
 
-/* update context saat user klik apa pun */
 document.addEventListener("click", updateWAContext);
 </script>
 </body>
