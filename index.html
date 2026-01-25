@@ -667,12 +667,12 @@ function openMedia(type){
     el = document.createElement("img");
     el.src = fullPath;
   }else{
-    el = document.createElement("video");
-    el.src = fullPath;
-    el.muted = true;
-    el.playsInline = true;
-    el.preload = "metadata";
-  }
+  el = document.createElement("video");
+  el.src = fullPath;
+  el.controls = true;        // 🔥 WAJIB
+  el.playsInline = true;     // 🔥 iOS fix
+  el.preload = "metadata";
+}
 
   el.onclick = ()=>openFullscreen(type, i, files);
   grid.appendChild(el);
@@ -821,9 +821,9 @@ function openFullscreen(type,start,files){
     }else{
 const v = document.createElement("video");
 v.src = src;
-v.controls = true;
-v.playsInline = true;
-v.preload = "metadata";
+v.controls = true;      // 🔥 WAJIB
+v.playsInline = true;   // 🔥 iOS FIX
+v.preload = "auto";
     }
 
     track.appendChild(wrap);
