@@ -575,42 +575,94 @@ footer{
 </div>
 
 <script>
-let projects=[];
-let currentProject=null;
+/* =========================
+   GLOBAL STATE
+   ========================= */
+let projects = [];
+let currentProject = null;
 
+let fsIndex = 0;
+let fsItems = [];
+let dotsTimer = null;
+
+
+/* =========================
+   FETCH & RENDER PROJECT
+   ========================= */
 fetch("projects.json")
-.then(r=>r.json())
-.then(d=>{projects=d;renderProjects()});
+  .then(r => r.json())
+  .then(d => {
+    projects = d;
+    renderProjects();
+  });
 
 function renderProjects(){
-  const grid=document.getElementById("projectGrid");
-  grid.innerHTML="";
+  const grid = document.getElementById("projectGrid");
+  grid.innerHTML = "";
+
   projects.forEach((p,i)=>{
-    const card=document.createElement("div");
-    card.className="project-card";
-    card.innerHTML=`
+    const card = document.createElement("div");
+    card.className = "project-card";
+    card.innerHTML = `
       <h3>${p.name}</h3>
-      <p style="color:var(--muted)">📍 ${p.location}<br>💰 ${p.price}</p>
+      <p style="color:var(--muted)">
+        📍 ${p.location}<br>
+        💰 ${p.price}
+      </p>
     `;
-    card.onclick=()=>openModal(i);
+    card.onclick = () => openModal(i);
     grid.appendChild(card);
   });
 }
 
+
+/* =========================
+   UTILITIES
+   ========================= */
 function getSrc(file){
-  return file.startsWith("http") ? file : currentProject.folder + file;
+  return file.startsWith("http")
+    ? file
+    : currentProject.folder + file;
 }
 
+function generateWA(projectName){
+  return `https://wa.me/6281802168184?text=${encodeURIComponent(
+    `Halo, saya telah melihat website Dhito Property dan tertarik dengan project ${projectName}.`
+  )}`;
+}
+
+function showSplash(){
+  document.getElementById("splash").classList.add("active");
+}
+
+function hideSplash(){
+  document.getElementById("splash").classList.remove("active");
+}
+
+function enableZoom(img){
+  let zoomed = false;
+  img.ondblclick = ()=>{
+    zoomed = !zoomed;
+    img.style.transform = zoomed ? "scale(2)" : "scale(1)";
+  };
+}
+
+
+/* =========================
+   MODAL OPEN
+   ========================= */
 function openModal(i){
-  const p=projects[i];
-  currentProject=p;
+  const p = projects[i];
+  currentProject = p;
 
   document.body.classList.add("modal-open");
   document.getElementById("modal").classList.add("active");
 
-  document.getElementById("modalBody").innerHTML=`
+  document.getElementById("modalBody").innerHTML = `
     <h2>${p.name}</h2>
-    <p style="color:var(--muted)">📍 ${p.location} • 💰 ${p.price}</p>
+    <p style="color:var(--muted)">
+      📍 ${p.location} • 💰 ${p.price}
+    </p>
 
     <p>${p.description || ""}</p>
 
@@ -619,29 +671,29 @@ function openModal(i){
       <ul>${p.nearby.map(n=>`<li>${n}</li>`).join("")}</ul>
     ` : ""}
 
-<div class="action-bar">
-  <button class="action-btn" onclick="showGallery()">Lihat Foto</button>
-  <button class="action-btn" onclick="showVideo()">Lihat Video</button>
-</div>
+    <div class="action-bar">
+      <button class="action-btn" onclick="showGallery()">Lihat Foto</button>
+      <button class="action-btn" onclick="showVideo()">Lihat Video</button>
+    </div>
 
-    <!-- TETAP ADA (TIDAK DIHAPUS) -->
     <div class="gallery" id="gallery">
       ${(p.images||[]).map(img=>`<img data-src="${img}">`).join("")}
     </div>
 
     <div class="video-box" id="videoBox"></div>
 
-<div class="cta-group bottom">
-  <a href="${p.mapLink}" target="_blank" class="btn">Google Maps</a>
-  <a href="${generateWA(p.name)}" target="_blank" class="btn primary">Tanya Unit</a>
-</div>
+    <div class="cta-group bottom">
+      <a href="${p.mapLink}" target="_blank" class="btn">Google Maps</a>
+      <a href="${generateWA(p.name)}" target="_blank" class="btn primary">Tanya Unit</a>
+    </div>
   `;
 
   initSwipe();
 }
 
+
 /* =========================
-   🔥 OVERRIDE PERILAKU
+   MEDIA ENTRY POINT
    ========================= */
 function showGallery(){
   openMedia("photo");
@@ -651,19 +703,9 @@ function showVideo(){
   openMedia("video");
 }
 
-function showSplash(){document.getElementById("splash").classList.add("active")}
-function hideSplash(){document.getElementById("splash").classList.remove("active")}
-
-function enableZoom(img){
-  let zoomed=false;
-  img.ondblclick=()=>{
-    zoomed=!zoomed;
-    img.style.transform=zoomed ? "scale(2)" : "scale(1)";
-  };
-}
 
 /* =========================
-   🖼️ MEDIA POPUP IOS STYLE
+   MEDIA POPUP
    ========================= */
 function openMedia(type){
   const popup = document.getElementById("mediaPopup");
@@ -676,45 +718,33 @@ function openMedia(type){
   const files = (currentProject.media || [])
     .filter(f => type === "photo" ? isImage(f) : isVideo(f));
 
-  files.forEach((file, i) => {
+  files.forEach((file,i)=>{
     const fullPath = getSrc(file);
     let el;
 
-    /* ======================
-       📸 FOTO → SLIDER + DOTS
-       ====================== */
     if(type === "photo"){
       el = document.createElement("img");
       el.src = fullPath;
-
-      // 🔥 BALIK KE PERILAKU LAMA
-      el.addEventListener("click", () => {
+      el.addEventListener("click",()=>{
         openFullscreen("photo", i, files);
       });
-    }
-
-    /* ======================
-       🎥 VIDEO → NATIVE FULLSCREEN
-       ====================== */
-    else{
+    } else {
       el = document.createElement("video");
       el.src = fullPath;
-
       el.controls = false;
       el.poster = "";
       el.preload = "metadata";
       el.playsInline = false;
       el.muted = false;
-
       el.style.width = "100%";
       el.style.background = "#000";
 
-      el.addEventListener("click", () => {
-        el.play().then(() => {
-          if (el.webkitEnterFullscreen) {
-            el.webkitEnterFullscreen(); // iOS
-          } else if (el.requestFullscreen) {
-            el.requestFullscreen(); // Android
+      el.addEventListener("click",()=>{
+        el.play().then(()=>{
+          if(el.webkitEnterFullscreen){
+            el.webkitEnterFullscreen();
+          } else if(el.requestFullscreen){
+            el.requestFullscreen();
           }
         }).catch(()=>{});
       });
@@ -736,11 +766,7 @@ function closeMedia(e){
   const grid  = document.getElementById("mediaGrid");
 
   popup.classList.remove("active");
-
-  // tunggu animasi blur kelar
-  setTimeout(()=>{
-    grid.innerHTML="";
-  },200);
+  setTimeout(()=>grid.innerHTML="",200);
 }
 
 document.querySelector(".media-sheet").addEventListener("click",e=>{
@@ -749,76 +775,66 @@ document.querySelector(".media-sheet").addEventListener("click",e=>{
 
 
 /* =========================
-   MODAL CLOSE
+   MODAL CLOSE & SWIPE
    ========================= */
 function closeModal(){
-  const sheet=document.querySelector(".sheet");
-  sheet.style.transform="translate(-50%,100%)";
+  const sheet = document.querySelector(".sheet");
+  sheet.style.transform = "translate(-50%,100%)";
+
   setTimeout(()=>{
     document.getElementById("modal").classList.remove("active");
     document.body.classList.remove("modal-open");
-    sheet.style.transform="";
+    sheet.style.transform = "";
   },350);
 }
 
-/* 🔒 SWIPE TIDAK SENSITIF */
 function initSwipe(){
-  const sheet=document.querySelector(".sheet");
-  const body=document.querySelector(".sheet-body");
-  let startY=0,currentY=0,dragging=false;
+  const sheet = document.querySelector(".sheet");
+  const body  = document.querySelector(".sheet-body");
+
+  let startY = 0;
+  let currentY = 0;
+  let dragging = false;
 
   sheet.addEventListener("touchstart",e=>{
-    if(body.scrollTop===0){
-      startY=e.touches[0].clientY;
-      dragging=true;
-      sheet.style.transition="none";
+    if(body.scrollTop === 0){
+      startY = e.touches[0].clientY;
+      dragging = true;
+      sheet.style.transition = "none";
     }
   });
 
   sheet.addEventListener("touchmove",e=>{
     if(!dragging) return;
-    currentY=e.touches[0].clientY;
-    const diff=currentY-startY;
-    if(diff>0){
-      sheet.style.transform=`translate(-50%,${diff*0.6}px)`;
+    currentY = e.touches[0].clientY;
+    const diff = currentY - startY;
+    if(diff > 0){
+      sheet.style.transform = `translate(-50%,${diff * 0.6}px)`;
     }
   });
 
   sheet.addEventListener("touchend",()=>{
     if(!dragging) return;
-    dragging=false;
-    sheet.style.transition="transform .45s cubic-bezier(.22,.61,.36,1)";
-    const diff=currentY-startY;
-    diff>180 ? closeModal() : sheet.style.transform="translate(-50%,0)";
+    dragging = false;
+    sheet.style.transition = "transform .45s cubic-bezier(.22,.61,.36,1)";
+    const diff = currentY - startY;
+    diff > 180 ? closeModal() : sheet.style.transform = "translate(-50%,0)";
   });
 }
 
-function lazyLoadGallery(){
-  document.querySelectorAll(".gallery img").forEach(img=>{
-    img.src=img.dataset.src;
-    img.onload=()=>img.classList.add("loaded");
-  });
-}
 
-function generateWA(projectName){
-  return `https://wa.me/6281802168184?text=${encodeURIComponent(
-    `Halo, saya telah melihat website Dhito Property dan tertarik dengan project ${projectName}.`
-  )}`;
-}
-
-let fsIndex=0;
-let fsItems=[];
-let dotsTimer=null;
-
+/* =========================
+   FULLSCREEN SLIDER
+   ========================= */
 const fullscreenEl = document.getElementById("fullscreen");
 
-fullscreenEl.addEventListener("click",(e)=>{
-  if (e.target.closest(".fs-close")) return;
-  if (!e.target.closest(".fs-item")) return;
+fullscreenEl.addEventListener("click",e=>{
+  if(e.target.closest(".fs-close")) return;
+  if(!e.target.closest(".fs-item")) return;
   showDots();
 });
 
-const IMAGE_EXT = /\.(JPG|JPEG|PNG|WEBP|GIF)$/i;
+const IMAGE_EXT = /\.(jpg|jpeg|png|webp|gif)$/i;
 const VIDEO_EXT = /\.(mp4|webm|ogg|mov)$/i;
 
 function isImage(src){
@@ -829,15 +845,21 @@ function isVideo(src){
   return VIDEO_EXT.test(src.toLowerCase()) || src.includes("cloudinary.com");
 }
 
-
 function showDots(){
-  const dots=document.getElementById("fsDots");
+  const dots = document.getElementById("fsDots");
   dots.classList.add("show");
 
   clearTimeout(dotsTimer);
-  dotsTimer=setTimeout(()=>{
+  dotsTimer = setTimeout(()=>{
     dots.classList.remove("show");
   },1800);
+}
+
+function updateDots(){
+  document.querySelectorAll(".fs-dots span").forEach((d,i)=>{
+    d.classList.toggle("active", i === fsIndex);
+  });
+  showDots();
 }
 
 function openFullscreen(type,start,files){
@@ -856,7 +878,6 @@ function openFullscreen(type,start,files){
   files.forEach((file,i)=>{
     const wrap = document.createElement("div");
     wrap.className = "fs-item";
-
     const src = getSrc(file);
 
     if(type === "photo"){
@@ -864,7 +885,7 @@ function openFullscreen(type,start,files){
       img.src = src;
       enableZoom(img);
       wrap.appendChild(img);
-    }else{
+    } else {
       const v = document.createElement("video");
       v.src = src;
       v.preload = "auto";
@@ -872,7 +893,6 @@ function openFullscreen(type,start,files){
       v.controls = false;
       wrap.appendChild(v);
 
-      // autoplay saat slide aktif
       if(i === fsIndex){
         setTimeout(()=>v.play().catch(()=>{}),200);
       }
@@ -880,7 +900,6 @@ function openFullscreen(type,start,files){
 
     track.appendChild(wrap);
 
-    // DOT
     const dot = document.createElement("span");
     if(i === fsIndex) dot.classList.add("active");
     dots.appendChild(dot);
@@ -892,8 +911,7 @@ function openFullscreen(type,start,files){
   fs.classList.add("active");
 
   initFullscreenSwipe(type);
-  updateDots();           // 🔥 WAJIB
-  showDots();             // 🔥 WAJIB
+  updateDots();
 
   setTimeout(hideSplash,300);
 }
@@ -901,19 +919,12 @@ function openFullscreen(type,start,files){
 function closeFullscreen(e){
   if(e){
     e.preventDefault();
-    e.stopImmediatePropagation(); // 🔥 ini kuncinya
+    e.stopImmediatePropagation();
   }
   document.querySelectorAll(".fs-item video").forEach(v=>v.pause());
-  const fs=document.getElementById("fullscreen");
+  const fs = document.getElementById("fullscreen");
   fs.classList.remove("active");
-  document.getElementById("fsTrack").style.transform="";
-}
-
-function updateDots(){
-  document.querySelectorAll(".fs-dots span").forEach((d,i)=>{
-    d.classList.toggle("active",i===fsIndex);
-  });
-  showDots(); // 🔥 auto show + auto hide
+  document.getElementById("fsTrack").style.transform = "";
 }
 
 function initFullscreenSwipe(type){
@@ -946,7 +957,6 @@ function initFullscreenSwipe(type){
     if(diffX >  80 && fsIndex > 0) fsIndex--;
 
     track.style.transform = `translateX(-${fsIndex * 100}%)`;
-
     updateDots();
   };
 
