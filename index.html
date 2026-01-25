@@ -834,17 +834,23 @@ function openFullscreen(type,start,files){
 const v = document.createElement("video");
 v.src = src;
 v.controls = true;
-v.playsInline = true;
 v.preload = "auto";
-
-// FIX IOS
+v.playsInline = false; // 🔥 penting
 v.style.width = "100%";
 v.style.height = "100%";
 v.style.objectFit = "contain";
 v.style.background = "#000";
 
-// 🔥 PENTING
-v.style.pointerEvents = "auto";
+// 🔥 PAKSA FULLSCREEN SAAT PLAY (ANDROID)
+v.addEventListener("play", () => {
+  if (document.fullscreenElement) return;
+
+  if (v.requestFullscreen) {
+    v.requestFullscreen();
+  } else if (v.webkitEnterFullscreen) {
+    v.webkitEnterFullscreen(); // iOS fallback
+  }
+});
 
 wrap.appendChild(v);
     }
