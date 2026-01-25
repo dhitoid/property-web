@@ -751,68 +751,90 @@ footer{
   font-weight:600;
 }
 
-/* ===== CUSTOM SELECT ===== */
-.custom-select{
+/* ===== TENOR SELECT PREMIUM ===== */
+.tenor-select{
   position:relative;
   margin-top:6px;
-  user-select:none;
+  font-family:inherit;
 }
 
-.select-display{
+/* DISPLAY */
+.tenor-display{
   display:flex;
   justify-content:space-between;
   align-items:center;
-  padding:12px 14px;
-  border-radius:12px;
-  background:#111;
-  border:1px solid #222;
+  padding:14px 16px;
+  border-radius:14px;
+  background:rgba(20,20,20,.75);
+  backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,.08);
   cursor:pointer;
+  transition:.25s ease;
+  box-shadow:0 0 0 rgba(0,255,180,0);
+}
+
+.tenor-display:hover{
+  border-color:rgba(0,255,180,.4);
+}
+
+.tenor-select.open .tenor-display{
+  box-shadow:0 0 18px rgba(0,255,180,.35);
+}
+
+.chevron{
+  font-size:18px;
   transition:.25s;
 }
 
-.select-display:hover{
-  border-color:#444;
-}
-
-.custom-select.open .select-display svg{
+.tenor-select.open .chevron{
   transform:rotate(180deg);
 }
 
-.select-options{
+/* OPTIONS */
+.tenor-options{
   position:absolute;
+  inset:auto 0 0 0;
   top:110%;
-  left:0;
-  right:0;
-  background:#0d0d0d;
-  border:1px solid #222;
-  border-radius:14px;
-  overflow:hidden;
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+  padding:12px;
+  border-radius:18px;
+  background:rgba(10,10,10,.9);
+  backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,.08);
   opacity:0;
-  transform:translateY(-8px);
+  transform:translateY(-10px) scale(.96);
   pointer-events:none;
-  transition:.25s;
-  z-index:20;
+  transition:.25s ease;
+  z-index:30;
 }
 
-.custom-select.open .select-options{
+.tenor-select.open .tenor-options{
   opacity:1;
-  transform:translateY(0);
+  transform:translateY(0) scale(1);
   pointer-events:auto;
 }
 
-.option{
-  padding:12px 14px;
+/* OPTION PILL */
+.tenor-option{
+  padding:12px 10px;
+  text-align:center;
+  border-radius:999px;
+  background:#161616;
   cursor:pointer;
   transition:.2s;
 }
 
-.option:hover{
-  background:#1a1a1a;
+.tenor-option:hover{
+  background:#222;
 }
 
-.option.active{
-  background:#222;
+.tenor-option.active{
+  background:linear-gradient(135deg,#00ffc6,#00bfa5);
+  color:#000;
   font-weight:600;
+  box-shadow:0 0 14px rgba(0,255,180,.6);
 }
 
 </style>
@@ -1039,22 +1061,19 @@ function openModal(i){
       <input type="range" id="dpRange" min="5" max="50" value="25">
 
 <label>Tenor</label>
-<div class="custom-select" id="tenorSelect" data-value="15">
-  <div class="select-display">
+<div class="tenor-select" id="tenorSelect" data-value="15">
+  <div class="tenor-display">
     <span id="tenorLabel">15 Tahun</span>
-    <svg width="14" height="14" viewBox="0 0 24 24">
-      <path d="M7 10l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2"/>
-    </svg>
+    <span class="chevron">⌄</span>
   </div>
 
-  <div class="select-options">
-    <div class="option" data-value="10">10 Tahun</div>
-    <div class="option active" data-value="15">15 Tahun</div>
-    <div class="option" data-value="20">20 Tahun</div>
-    <div class="option" data-value="25">25 Tahun</div>
+  <div class="tenor-options">
+    <div class="tenor-option" data-value="10">10 Tahun</div>
+    <div class="tenor-option active" data-value="15">15 Tahun</div>
+    <div class="tenor-option" data-value="20">20 Tahun</div>
+    <div class="tenor-option" data-value="25">25 Tahun</div>
   </div>
 </div>
-
       <div class="cicilan-result">
         Estimasi Cicilan:
         <strong id="cicilanValue">-</strong> / bulan
@@ -1093,19 +1112,22 @@ function initCicilan(){
   const cicilanEl = document.getElementById("cicilanValue");
   const waBtn     = document.getElementById("modalWA");
 
+  /* ===== TENOR CUSTOM SELECT ===== */
   const select    = document.getElementById("tenorSelect");
+  const display   = select.querySelector(".tenor-display");
   const label     = document.getElementById("tenorLabel");
-  const options   = select.querySelectorAll(".option");
+  const options   = select.querySelectorAll(".tenor-option");
 
-  let tenorYear = parseInt(select.dataset.value);
+  let tenorYear = parseInt(select.dataset.value) || 15;
 
-  /* ===== CUSTOM SELECT UX ===== */
-  select.querySelector(".select-display").onclick = () => {
+  /* open / close select */
+  display.addEventListener("click", ()=>{
     select.classList.toggle("open");
-  };
+  });
 
+  /* pilih tenor */
   options.forEach(opt=>{
-    opt.onclick = ()=>{
+    opt.addEventListener("click", ()=>{
       options.forEach(o=>o.classList.remove("active"));
       opt.classList.add("active");
 
@@ -1115,22 +1137,24 @@ function initCicilan(){
 
       select.classList.remove("open");
       hitung();
-    };
+    });
   });
 
+  /* klik di luar = close */
   document.addEventListener("click", e=>{
     if(!select.contains(e.target)){
       select.classList.remove("open");
     }
   });
 
+  /* ===== HITUNG CICILAN ===== */
   function hitung(){
     const price = currentProject.priceValue;
     if(!price) return;
 
     const dpPercent = dpRange.value / 100;
     const tenor     = tenorYear * 12;
-    const bunga     = 0.10 / 12;
+    const bunga     = 0.10 / 12; // estimasi 10% / tahun
 
     const loan = price * (1 - dpPercent);
 
@@ -1151,6 +1175,8 @@ Estimasi cicilan ${cicilanEl.textContent}`
   }
 
   dpRange.addEventListener("input", hitung);
+
+  /* init pertama */
   hitung();
 }
 
