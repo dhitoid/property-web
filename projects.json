@@ -2,9 +2,14 @@
   {
     "name": "Grand Pakis Residence",
     "location": "Pamulang",
+
     "price": "Mulai 3 Jutaan",
+    "priceValue": 750000000,
+
     "status": "ready",
+
     "description": "Grand Pakis Residence adalah perumahan modern satu lantai dengan konsep nyaman, aman, dan akses strategis. Cocok untuk keluarga muda maupun investasi jangka panjang.",
+
     "folder": "assets/gpr/",
     "media": [
       "brosur.JPEG",
@@ -29,12 +34,18 @@
 
     "mapLink": "https://maps.app.goo.gl/Fvotf4DuBzyxvqM69?g_st=ic"
   },
+
   {
     "name": "Grand Duta Pakis",
     "location": "Cibinong",
+
     "price": "Mulai 2 Jutaan",
+    "priceValue": 620000000,
+
     "status": "ready",
+
     "description": "Grand Duta Pakis menghadirkan hunian minimalis modern dengan lingkungan tenang dan sistem keamanan one gate. Proses KPR mudah dan legalitas aman.",
+
     "folder": "assets/gdp/",
     "media": [
       "brosur.JPEG",
