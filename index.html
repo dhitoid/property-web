@@ -838,6 +838,95 @@ footer{
   box-shadow:0 0 14px rgba(0,255,180,.6);
 }
 
+/* ===== TENOR TRIGGER ===== */
+.tenor-trigger{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:14px 16px;
+  border-radius:14px;
+  background:rgba(20,20,20,.8);
+  backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,.08);
+  cursor:pointer;
+}
+
+.tenor-trigger .chevron{
+  transform:rotate(180deg);
+  opacity:.6;
+}
+
+/* ===== BOTTOM SHEET ===== */
+.tenor-sheet{
+  position:fixed;
+  inset:0;
+  z-index:999;
+  display:none;
+}
+
+.tenor-sheet.active{
+  display:block;
+}
+
+.sheet-backdrop{
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,.5);
+  backdrop-filter:blur(2px);
+}
+
+.sheet-panel{
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  background:#0c0c0c;
+  border-radius:20px 20px 0 0;
+  padding:16px;
+  transform:translateY(100%);
+  transition:.3s ease;
+}
+
+.tenor-sheet.active .sheet-panel{
+  transform:translateY(0);
+}
+
+.sheet-handle{
+  width:42px;
+  height:4px;
+  background:#333;
+  border-radius:10px;
+  margin:0 auto 10px;
+}
+
+.sheet-panel h4{
+  text-align:center;
+  margin-bottom:14px;
+}
+
+/* ===== OPTIONS ===== */
+.sheet-options{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
+}
+
+.sheet-option{
+  padding:14px;
+  border-radius:14px;
+  text-align:center;
+  background:#151515;
+  cursor:pointer;
+}
+
+.sheet-option.active{
+  background:linear-gradient(135deg,#00ffc6,#00bfa5);
+  color:#000;
+  font-weight:600;
+  box-shadow:0 0 16px rgba(0,255,180,.6);
+}
+
+
 </style>
 </head>
 
@@ -954,6 +1043,23 @@ footer{
   </a>
 </div>
 
+<!-- TENOR BOTTOM SHEET -->
+<div class="tenor-sheet" id="tenorSheet">
+  <div class="sheet-backdrop"></div>
+
+  <div class="sheet-panel">
+    <div class="sheet-handle"></div>
+    <h4>Pilih Tenor</h4>
+
+    <div class="sheet-options">
+      <div class="sheet-option" data-value="10">10 Tahun</div>
+      <div class="sheet-option active" data-value="15">15 Tahun</div>
+      <div class="sheet-option" data-value="20">20 Tahun</div>
+      <div class="sheet-option" data-value="25">25 Tahun</div>
+    </div>
+  </div>
+</div>
+
 <script>
 /* =========================
    GLOBAL STATE
@@ -1062,18 +1168,11 @@ function openModal(i){
       <input type="range" id="dpRange" min="5" max="50" value="25">
 
 <label>Tenor</label>
-<div class="tenor-select" id="tenorSelect" data-value="15">
-  <div class="tenor-display">
-    <span id="tenorLabel">15 Tahun</span>
-    <span class="chevron">⌄</span>
-  </div>
+<div class="tenor-trigger" id="tenorTrigger">
+  <span id="tenorLabel">15 Tahun</span>
+  <span class="chevron">⌃</span>
+</div>
 
-  <div class="tenor-options">
-    <div class="tenor-option" data-value="10">10 Tahun</div>
-    <div class="tenor-option active" data-value="15">15 Tahun</div>
-    <div class="tenor-option" data-value="20">20 Tahun</div>
-    <div class="tenor-option" data-value="25">25 Tahun</div>
-  </div>
 </div>
       <div class="cicilan-result">
         Estimasi Cicilan:
@@ -1113,49 +1212,44 @@ function initCicilan(){
   const cicilanEl = document.getElementById("cicilanValue");
   const waBtn     = document.getElementById("modalWA");
 
-  /* ===== TENOR CUSTOM SELECT ===== */
-  const select    = document.getElementById("tenorSelect");
-  const display   = select.querySelector(".tenor-display");
+  /* TENOR */
+  const trigger   = document.getElementById("tenorTrigger");
   const label     = document.getElementById("tenorLabel");
-  const options   = select.querySelectorAll(".tenor-option");
+  const sheet     = document.getElementById("tenorSheet");
+  const backdrop  = sheet.querySelector(".sheet-backdrop");
+  const options   = sheet.querySelectorAll(".sheet-option");
 
-  let tenorYear = parseInt(select.dataset.value) || 15;
+  let tenorYear = 15;
 
-  /* open / close select */
-  display.addEventListener("click", ()=>{
-    select.classList.toggle("open");
-  });
+  /* open sheet */
+  trigger.onclick = ()=>{
+    sheet.classList.add("active");
+  };
+
+  /* close sheet */
+  backdrop.onclick = ()=> sheet.classList.remove("active");
 
   /* pilih tenor */
   options.forEach(opt=>{
-    opt.addEventListener("click", ()=>{
+    opt.onclick = ()=>{
       options.forEach(o=>o.classList.remove("active"));
       opt.classList.add("active");
 
       tenorYear = parseInt(opt.dataset.value);
-      select.dataset.value = tenorYear;
       label.textContent = opt.textContent;
 
-      select.classList.remove("open");
+      sheet.classList.remove("active");
       hitung();
-    });
+    };
   });
 
-  /* klik di luar = close */
-  document.addEventListener("click", e=>{
-    if(!select.contains(e.target)){
-      select.classList.remove("open");
-    }
-  });
-
-  /* ===== HITUNG CICILAN ===== */
   function hitung(){
     const price = currentProject.priceValue;
     if(!price) return;
 
     const dpPercent = dpRange.value / 100;
     const tenor     = tenorYear * 12;
-    const bunga     = 0.10 / 12; // estimasi 10% / tahun
+    const bunga     = 0.10 / 12;
 
     const loan = price * (1 - dpPercent);
 
@@ -1176,8 +1270,6 @@ Estimasi cicilan ${cicilanEl.textContent}`
   }
 
   dpRange.addEventListener("input", hitung);
-
-  /* init pertama */
   hitung();
 }
 
