@@ -383,10 +383,16 @@ footer{
 }
 
 .fs-item{
-  min-width:100%;
+  width:100%;
+  height:100%;
   display:flex;
-  justify-content:center;
   align-items:center;
+  justify-content:center;
+  background:#000;
+}
+
+.fs-item *{
+  pointer-events:auto;
 }
 
 .fs-item img,
@@ -831,14 +837,16 @@ v.controls = true;
 v.playsInline = true;
 v.preload = "auto";
 
-// 🔥 FIX IOS BLACK SCREEN
+// FIX IOS
 v.style.width = "100%";
 v.style.height = "100%";
 v.style.objectFit = "contain";
 v.style.background = "#000";
 
-wrap.appendChild(v);
+// 🔥 PENTING
+v.style.pointerEvents = "auto";
 
+wrap.appendChild(v);
     }
 
     track.appendChild(wrap);
