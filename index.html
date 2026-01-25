@@ -676,40 +676,40 @@ function openMedia(type){
     let el;
 
     /* ======================
-       📸 FOTO → CUSTOM FS
+       📸 FOTO → SLIDER + DOTS
        ====================== */
-    if(type==="photo"){
-    el = document.createElement("img");
-    el.src = fullPath;
+    if(type === "photo"){
+      el = document.createElement("img");
+      el.src = fullPath;
+
+      // 🔥 BALIK KE PERILAKU LAMA
+      el.addEventListener("click", () => {
+        openFullscreen("photo", i, files);
+      });
     }
 
     /* ======================
-       🎥 VIDEO → NATIVE FS
+       🎥 VIDEO → NATIVE FULLSCREEN
        ====================== */
     else{
       el = document.createElement("video");
       el.src = fullPath;
 
-      // 🔥 SETUP PALING AMAN
-      el.controls = false;       // hilangin play icon palsu
-      el.poster = "";            // no thumbnail
+      el.controls = false;
+      el.poster = "";
       el.preload = "metadata";
-      el.playsInline = false;    // WAJIB agar fullscreen
+      el.playsInline = false;
       el.muted = false;
 
       el.style.width = "100%";
       el.style.background = "#000";
 
-      // 🔥 1 TAP → PLAY + FULLSCREEN
       el.addEventListener("click", () => {
         el.play().then(() => {
-          // iOS
           if (el.webkitEnterFullscreen) {
-            el.webkitEnterFullscreen();
-          }
-          // Android
-          else if (el.requestFullscreen) {
-            el.requestFullscreen();
+            el.webkitEnterFullscreen(); // iOS
+          } else if (el.requestFullscreen) {
+            el.requestFullscreen(); // Android
           }
         }).catch(()=>{});
       });
