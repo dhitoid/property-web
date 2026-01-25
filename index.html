@@ -1164,17 +1164,20 @@ function renderProjects(){
     card.className = "project-card";
 
     card.innerHTML = `
-      <!-- BADGE PROMO / LIMITED (OPTIONAL) -->
-      ${p.badge ? `
-        <span class="card-badge ${p.badge.type}">
-          ${p.badge.text}
-        </span>
-      ` : ""}
+      <!-- BADGE WRAPPER -->
+      <div class="card-badges">
 
-      <!-- STATUS -->
-      <span class="status ${p.status || 'ready'}">
-        ${(p.status || 'READY').toUpperCase()}
-      </span>
+        ${p.badge ? `
+          <span class="card-badge ${p.badge.type}">
+            ${p.badge.text}
+          </span>
+        ` : ""}
+
+        <span class="status ${p.status || 'ready'}">
+          ${(p.status || 'READY').toUpperCase()}
+        </span>
+
+      </div>
 
       <h3>${p.name}</h3>
     `;
@@ -1233,11 +1236,6 @@ function openModal(i){
   </div>
 ` : ""}
     <h2>${p.name}</h2>
-
-    <span class="status ${p.status || 'ready'}">
-      ${(p.status || 'READY').toUpperCase()}
-    </span>
-
     <p class="muted">
       📍 ${p.location}
     </p>
@@ -1656,23 +1654,26 @@ function applyProjectFilter(type){
       : projects.filter(p => (p.status || "ready") === type);
 
   filtered.forEach(p=>{
-    const index = projects.indexOf(p); // aman untuk openModal
+    const index = projects.indexOf(p);
 
     const card = document.createElement("div");
     card.className = "project-card";
 
     card.innerHTML = `
-      <!-- BADGE PROMO / LIMITED -->
-      ${p.badge ? `
-        <span class="card-badge ${p.badge.type}">
-          ${p.badge.text}
-        </span>
-      ` : ""}
+      <!-- BADGE WRAPPER -->
+      <div class="card-badges">
 
-      <!-- STATUS -->
-      <span class="status ${p.status || 'ready'}">
-        ${(p.status || 'READY').toUpperCase()}
-      </span>
+        ${p.badge ? `
+          <span class="card-badge ${p.badge.type}">
+            ${p.badge.text}
+          </span>
+        ` : ""}
+
+        <span class="status ${p.status || 'ready'}">
+          ${(p.status || 'READY').toUpperCase()}
+        </span>
+
+      </div>
 
       <h3>${p.name}</h3>
     `;
