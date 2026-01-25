@@ -394,6 +394,12 @@ footer{
   max-width:100%;
   max-height:100%;
   object-fit:contain;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#000;
+}
+
 }
 
 .fs-dots{
@@ -821,9 +827,18 @@ function openFullscreen(type,start,files){
     }else{
 const v = document.createElement("video");
 v.src = src;
-v.controls = true;      // 🔥 WAJIB
-v.playsInline = true;   // 🔥 iOS FIX
+v.controls = true;
+v.playsInline = true;
 v.preload = "auto";
+
+// 🔥 FIX IOS BLACK SCREEN
+v.style.width = "100%";
+v.style.height = "100%";
+v.style.objectFit = "contain";
+v.style.background = "#000";
+
+wrap.appendChild(v);
+
     }
 
     track.appendChild(wrap);
