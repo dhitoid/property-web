@@ -24,15 +24,15 @@
       "10 menit ke Pamulang"
     ],
 
-    "mapLink": "https://maps.google.com/?q=Pamulang"
+    "mapLink": "https://maps.app.goo.gl/Fvotf4DuBzyxvqM69?g_st=ic"
   },
   {
     "name": "Grand Duta Pakis",
-    "location": "Pamulang",
-    "price": "Mulai 3 Jutaan",
+    "location": "Cibinong",
+    "price": "Mulai 2 Jutaan",
 
     "description": "Grand Duta Pakis menghadirkan hunian minimalis modern dengan lingkungan tenang dan sistem keamanan one gate. Proses KPR mudah dan legalitas aman.",
-    "folder": "assets/gpr/",
+    "folder": "assets/gdp/",
     "media": [
       "brosur.JPEG",
       "spekgpr.JPEG",
@@ -49,6 +49,6 @@
       "Akses cepat ke Pamulang & BSD"
     ],
 
-    "mapLink": "https://maps.google.com/?q=Pamulang"
+    "mapLink": "https://maps.app.goo.gl/XGgBGL5jwyQbXDG46?g_st=ic"
   }
 ]
