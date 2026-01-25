@@ -231,6 +231,46 @@ section{
   opacity:.75;
 }
 
+/* ================= SOFT GLOW PROJECT ================= */
+.project-card{
+  transition:
+    transform .35s ease,
+    box-shadow .35s ease,
+    background .35s ease;
+}
+
+/* READY GLOW */
+.project-card:hover .status.ready{
+  box-shadow:
+    0 0 22px rgba(45,220,120,.35),
+    inset 0 0 12px rgba(45,220,120,.25);
+}
+
+/* BOOKING GLOW */
+.project-card:hover .status.booking{
+  box-shadow:
+    0 0 22px rgba(255,180,60,.35),
+    inset 0 0 12px rgba(255,180,60,.25);
+}
+
+/* SOLD – glow lebih redup */
+.project-card:hover .status.sold{
+  box-shadow:
+    0 0 14px rgba(255,80,80,.25),
+    inset 0 0 8px rgba(255,80,80,.18);
+}
+
+/* OPTIONAL: subtle outline glow ke card */
+.project-card:hover{
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.18),
+    0 12px 30px rgba(0,0,0,.45);
+}
+
+.status{
+  text-shadow:0 0 8px rgba(255,255,255,.25);
+}
+
 /* ================= CONTACT ================= */
 #contact{text-align:center}
 
