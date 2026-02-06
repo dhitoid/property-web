@@ -1000,31 +1000,9 @@ footer{
   box-shadow:0 0 14px rgba(0,255,180,.55);
 }
 
-/* ================= SIDEBAR ================= */
+/* ================= TOOLS RIGHT PANEL ================= */
 
-/* TOGGLE BUTTON */
-.sidebar-toggle{
-  position:fixed;
-  top:18px;
-  left:18px;
-  z-index:120;
-  width:44px;
-  height:44px;
-  border-radius:14px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:20px;
-  cursor:pointer;
-
-  background:rgba(255,255,255,.14);
-  backdrop-filter:blur(12px);
-  border:1px solid rgba(255,255,255,.25);
-  box-shadow:0 8px 24px rgba(0,0,0,.35);
-}
-
-/* OVERLAY */
-.sidebar-overlay{
+.tools-overlay{
   position:fixed;
   inset:0;
   background:rgba(0,0,0,.45);
@@ -1032,41 +1010,41 @@ footer{
   opacity:0;
   pointer-events:none;
   transition:.35s ease;
-  z-index:110;
+  z-index:140;
 }
 
-.sidebar-overlay.active{
+.tools-overlay.active{
   opacity:1;
   pointer-events:auto;
 }
 
-/* SIDEBAR PANEL */
-.sidebar{
+/* PANEL */
+.tools-panel{
   position:fixed;
   top:0;
-  left:0;
+  right:0;
   height:100vh;
-  width:260px;
-  transform:translateX(-100%);
-  transition:.4s cubic-bezier(.22,.61,.36,1);
-  z-index:120;
+  width:280px;
+  transform:translateX(100%);
+  transition:.45s cubic-bezier(.22,.61,.36,1);
+  z-index:150;
 
   background:linear-gradient(
     180deg,
     rgba(255,255,255,.18),
     rgba(255,255,255,.08)
   );
-  backdrop-filter:blur(22px);
-  border-right:1px solid rgba(255,255,255,.18);
+  backdrop-filter:blur(24px);
+  border-left:1px solid rgba(255,255,255,.18);
 }
 
 /* ACTIVE */
-.sidebar.active{
+.tools-panel.active{
   transform:translateX(0);
 }
 
 /* HEADER */
-.sidebar-header{
+.tools-header{
   display:flex;
   justify-content:space-between;
   align-items:center;
@@ -1074,20 +1052,20 @@ footer{
   border-bottom:1px solid rgba(255,255,255,.15);
 }
 
-.sidebar-close{
+.tools-close{
   font-size:22px;
   cursor:pointer;
 }
 
 /* MENU */
-.sidebar-menu{
+.tools-menu{
   display:flex;
   flex-direction:column;
-  padding:16px;
-  gap:10px;
+  padding:18px;
+  gap:12px;
 }
 
-.sidebar-menu a{
+.tools-menu a{
   padding:14px 16px;
   border-radius:14px;
   text-decoration:none;
@@ -1099,16 +1077,9 @@ footer{
   transition:.25s ease;
 }
 
-.sidebar-menu a:hover{
+.tools-menu a:hover{
   background:rgba(255,255,255,.22);
-  transform:translateX(4px);
-}
-
-/* HIDE ON DESKTOP IF MAU */
-@media(min-width:1100px){
-  .sidebar-toggle{
-    left:22px;
-  }
+  transform:translateX(-4px);
 }
 
 </style>
@@ -1122,9 +1093,11 @@ footer{
     <strong>Dhito Property</strong>
   </div>
   <div>
-    <a href="#home">Home</a>
-    <a href="#project">Project</a>
-    <a href="#contact">Kontak</a>
+<div>
+  <a href="#home">Home</a>
+  <a href="#project">Project</a>
+  <a href="#contact">Kontak</a>
+  <a href="javascript:void(0)" onclick="openTools()">Tools</a>
   </div>
 </nav>
 
@@ -1247,24 +1220,24 @@ footer{
 <!-- SIDEBAR TOGGLE BUTTON -->
 <div class="sidebar-toggle" onclick="openSidebar()">☰</div>
 
-<!-- SIDEBAR -->
-<div id="sidebarOverlay" class="sidebar-overlay" onclick="closeSidebar()"></div>
+<!-- TOOLS PANEL -->
+<div id="toolsOverlay" class="tools-overlay" onclick="closeTools()"></div>
 
-<aside id="sidebar" class="sidebar">
-  <div class="sidebar-header">
-    <strong>Dhito Tools</strong>
-    <span class="sidebar-close" onclick="closeSidebar()">✕</span>
+<aside id="toolsPanel" class="tools-panel">
+  <div class="tools-header">
+    <strong>Tools</strong>
+    <span class="tools-close" onclick="closeTools()">✕</span>
   </div>
 
-  <nav class="sidebar-menu">
-    <a href="#home">🏠 Home</a>
-    <a href="https://dhitoid.github.io/DT-PRO-WEB/" target="_blank">
-      Kalkulator KPR
+  <div class="tools-menu">
+    <a href="https://dhitoproperty.id/kalkulator-kpr" target="_blank">
+      🧮 Kalkulator KPR
     </a>
-    <a href="https://dhitoid.github.io/prompt-toolkit-bydhito/" target="_blank">
+
+    <a href="https://dhitoproperty.id/ai-prompt" target="_blank">
       🤖 Prompt AI
     </a>
-  </nav>
+  </div>
 </aside>
 
 <script>
@@ -1878,6 +1851,22 @@ window.addEventListener("scroll",()=>{
 
   lastScrollSidebar = currentScroll;
 });
+
+/* ================= TOOLS PANEL LOGIC ================= */
+const toolsPanel   = document.getElementById("toolsPanel");
+const toolsOverlay = document.getElementById("toolsOverlay");
+
+function openTools(){
+  toolsPanel.classList.add("active");
+  toolsOverlay.classList.add("active");
+  document.body.style.overflow = "hidden";
+}
+
+function closeTools(){
+  toolsPanel.classList.remove("active");
+  toolsOverlay.classList.remove("active");
+  document.body.style.overflow = "";
+}
 
 window.addEventListener("scroll",()=>{
   const currentY = window.scrollY;
