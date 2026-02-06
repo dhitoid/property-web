@@ -1000,6 +1000,117 @@ footer{
   box-shadow:0 0 14px rgba(0,255,180,.55);
 }
 
+/* ================= SIDEBAR ================= */
+
+/* TOGGLE BUTTON */
+.sidebar-toggle{
+  position:fixed;
+  top:18px;
+  left:18px;
+  z-index:120;
+  width:44px;
+  height:44px;
+  border-radius:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:20px;
+  cursor:pointer;
+
+  background:rgba(255,255,255,.14);
+  backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,.25);
+  box-shadow:0 8px 24px rgba(0,0,0,.35);
+}
+
+/* OVERLAY */
+.sidebar-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.45);
+  backdrop-filter:blur(2px);
+  opacity:0;
+  pointer-events:none;
+  transition:.35s ease;
+  z-index:110;
+}
+
+.sidebar-overlay.active{
+  opacity:1;
+  pointer-events:auto;
+}
+
+/* SIDEBAR PANEL */
+.sidebar{
+  position:fixed;
+  top:0;
+  left:0;
+  height:100vh;
+  width:260px;
+  transform:translateX(-100%);
+  transition:.4s cubic-bezier(.22,.61,.36,1);
+  z-index:120;
+
+  background:linear-gradient(
+    180deg,
+    rgba(255,255,255,.18),
+    rgba(255,255,255,.08)
+  );
+  backdrop-filter:blur(22px);
+  border-right:1px solid rgba(255,255,255,.18);
+}
+
+/* ACTIVE */
+.sidebar.active{
+  transform:translateX(0);
+}
+
+/* HEADER */
+.sidebar-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:18px 20px;
+  border-bottom:1px solid rgba(255,255,255,.15);
+}
+
+.sidebar-close{
+  font-size:22px;
+  cursor:pointer;
+}
+
+/* MENU */
+.sidebar-menu{
+  display:flex;
+  flex-direction:column;
+  padding:16px;
+  gap:10px;
+}
+
+.sidebar-menu a{
+  padding:14px 16px;
+  border-radius:14px;
+  text-decoration:none;
+  color:white;
+  font-size:14px;
+
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.18);
+  transition:.25s ease;
+}
+
+.sidebar-menu a:hover{
+  background:rgba(255,255,255,.22);
+  transform:translateX(4px);
+}
+
+/* HIDE ON DESKTOP IF MAU */
+@media(min-width:1100px){
+  .sidebar-toggle{
+    left:22px;
+  }
+}
+
 </style>
 </head>
 
@@ -1132,6 +1243,29 @@ footer{
     </div>
   </div>
 </div>
+
+<!-- SIDEBAR TOGGLE BUTTON -->
+<div class="sidebar-toggle" onclick="openSidebar()">☰</div>
+
+<!-- SIDEBAR -->
+<div id="sidebarOverlay" class="sidebar-overlay" onclick="closeSidebar()"></div>
+
+<aside id="sidebar" class="sidebar">
+  <div class="sidebar-header">
+    <strong>Dhito Tools</strong>
+    <span class="sidebar-close" onclick="closeSidebar()">✕</span>
+  </div>
+
+  <nav class="sidebar-menu">
+    <a href="#home">🏠 Home</a>
+    <a href="https://dhitoproperty.id/kalkulator-kpr" target="_blank">
+      🧮 Kalkulator KPR
+    </a>
+    <a href="https://dhitoproperty.id/ai-prompt" target="_blank">
+      🤖 Prompt AI
+    </a>
+  </nav>
+</aside>
 
 <script>
 /* =========================
@@ -1705,6 +1839,22 @@ function updateWAContext(){
 
   waLink.href =
     `https://wa.me/6281802168184?text=${encodeURIComponent(text)}`;
+}
+
+/* ================= SIDEBAR LOGIC ================= */
+const sidebar = document.getElementById("sidebar");
+const sidebarOverlay = document.getElementById("sidebarOverlay");
+
+function openSidebar(){
+  sidebar.classList.add("active");
+  sidebarOverlay.classList.add("active");
+  document.body.style.overflow = "hidden";
+}
+
+function closeSidebar(){
+  sidebar.classList.remove("active");
+  sidebarOverlay.classList.remove("active");
+  document.body.style.overflow = "";
 }
 
 window.addEventListener("scroll",()=>{
