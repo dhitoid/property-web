@@ -1111,6 +1111,72 @@ footer{
   }
 }
 
+/* ================= RADIAL MENU ================= */
+.radial-menu{
+  position:fixed;
+  bottom:22px;
+  left:22px;
+  width:60px;
+  height:60px;
+  z-index:130;
+}
+
+/* MAIN BUTTON */
+.radial-main{
+  width:60px;
+  height:60px;
+  border-radius:50%;
+  font-size:28px;
+  border:none;
+  cursor:pointer;
+  color:#000;
+
+  background:linear-gradient(135deg,#00ffc6,#00bfa5);
+  box-shadow:0 0 24px rgba(0,255,180,.6);
+}
+
+/* ITEMS */
+.radial-item{
+  position:absolute;
+  width:48px;
+  height:48px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:20px;
+  text-decoration:none;
+  color:#000;
+
+  background:white;
+  box-shadow:0 8px 22px rgba(0,0,0,.35);
+
+  opacity:0;
+  pointer-events:none;
+  transform:scale(.5);
+  transition:.35s cubic-bezier(.22,.61,.36,1);
+}
+
+/* ACTIVE STATE */
+.radial-menu.active .radial-item{
+  opacity:1;
+  pointer-events:auto;
+  transform:scale(1);
+}
+
+/* POSITIONS */
+.radial-menu.active .radial-item.kpr{
+  transform:translate(0,-80px);
+}
+
+.radial-menu.active .radial-item.ai{
+  transform:translate(70px,-50px);
+}
+
+.radial-menu.active .radial-item.home{
+  transform:translate(80px,10px);
+}
+
 </style>
 </head>
 
@@ -1258,7 +1324,7 @@ footer{
 
   <nav class="sidebar-menu">
     <a href="#home">🏠 Home</a>
-    <a href="https://dhitoproperty.id/kalkulator-kpr" target="https://dhitoid.github.io/DT-PRO-WEB/">
+    <a href="https://dhitoproperty.id/kalkulator-kpr" target="_blank">
       🧮 Kalkulator KPR
     </a>
     <a href="https://dhitoproperty.id/ai-prompt" target="_blank">
@@ -1266,6 +1332,25 @@ footer{
     </a>
   </nav>
 </aside>
+
+<!-- RADIAL MENU -->
+<div class="radial-menu">
+  <button class="radial-main" onclick="toggleRadial()">＋</button>
+
+  <a class="radial-item kpr"
+     href="https://dhitoid.github.io/DT-PRO-WEB"
+     target="_blank"
+     title="Kalkulator KPR">🧮</a>
+
+  <a class="radial-item ai"
+     href="https://dhitoproperty.id/ai-prompt"
+     target="_blank"
+     title="Prompt AI">🤖</a>
+
+  <a class="radial-item home"
+     href="#home"
+     title="Home">🏠</a>
+</div>
 
 <script>
 /* =========================
@@ -1855,6 +1940,35 @@ function closeSidebar(){
   sidebar.classList.remove("active");
   sidebarOverlay.classList.remove("active");
   document.body.style.overflow = "";
+}
+
+/* ================= SIDEBAR AUTO HIDE ON SCROLL ================= */
+let lastScrollSidebar = window.scrollY;
+const sidebarToggle = document.querySelector(".sidebar-toggle");
+
+window.addEventListener("scroll",()=>{
+  const currentScroll = window.scrollY;
+
+  if(currentScroll > lastScrollSidebar && currentScroll > 120){
+    // scroll turun
+    sidebarToggle.style.opacity = "0";
+    sidebarToggle.style.transform = "translateY(-20px)";
+    sidebarToggle.style.pointerEvents = "none";
+  }else{
+    // scroll naik
+    sidebarToggle.style.opacity = "1";
+    sidebarToggle.style.transform = "translateY(0)";
+    sidebarToggle.style.pointerEvents = "auto";
+  }
+
+  lastScrollSidebar = currentScroll;
+});
+
+/* ================= RADIAL MENU ================= */
+const radialMenu = document.querySelector(".radial-menu");
+
+function toggleRadial(){
+  radialMenu.classList.toggle("active");
 }
 
 window.addEventListener("scroll",()=>{
