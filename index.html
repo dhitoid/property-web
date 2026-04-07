@@ -3,7 +3,42 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="canonical" href="https://domainkamu.com">
+<meta name="robots" content="index, follow">
 <title>Nour Maandhito | Marketing Property</title>
+<!-- SEO BASIC -->
+<meta name="description" content="Marketing property terpercaya di Bogor. Rumah siap huni, legal aman, proses transparan. Hubungi Dhito Property sekarang.">
+<meta name="keywords" content="rumah bogor, jual rumah bogor, property bogor, rumah murah bogor, marketing property, dhito property">
+<meta name="author" content="Nour Maandhito">
+
+<!-- OPEN GRAPH (Share WhatsApp / Sosial Media) -->
+<meta property="og:title" content="Dhito Property | Marketing Property Bogor">
+<meta property="og:description" content="Temukan rumah impian Anda. Legal aman, tanpa ribet, proses transparan.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="assets/cover.jpg">
+<meta property="og:url" content="https://domainkamu.com">
+
+<!-- TWITTER CARD -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Dhito Property">
+<meta name="twitter:description" content="Marketing property terpercaya di Bogor">
+<meta name="twitter:image" content="assets/cover.jpg">
+  
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "RealEstateAgent",
+  "name": "Dhito Property",
+  "url": "https://domainkamu.com",
+  "telephone": "+6281802168184",
+  "areaServed": "Bogor",
+  "description": "Marketing property terpercaya di Bogor dengan proses aman dan transparan.",
+  "sameAs": [
+    "https://instagram.com/dhitoproperty.id",
+    "https://www.tiktok.com/@dhitopropertyid"
+  ]
+}
+</script>
 
 <style>
 /* ================= ROOT ================= */
@@ -1123,6 +1158,17 @@ background:rgba(255,255,255,.08);
 backdrop-filter:blur(20px);
 }
 
+.fade-up{
+  opacity:0;
+  transform:translateY(40px);
+  transition:all .8s cubic-bezier(.22,.61,.36,1);
+}
+
+.fade-up.show{
+  opacity:1;
+  transform:translateY(0);
+}
+
 </style>
 </head>
 
@@ -1945,6 +1991,24 @@ window.addEventListener("scroll",()=>{
   }
 
   lastScrollSidebar = currentScroll;
+});
+
+/* ================= SCROLL ANIMATION ================= */
+const observer = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      entry.target.classList.add("show");
+    }
+  });
+},{
+  threshold:.15
+});
+
+document.querySelectorAll(
+  "section, .project-card, .why-card, .testimoni-card"
+).forEach(el=>{
+  el.classList.add("fade-up");
+  observer.observe(el);
 });
 
 /* ================= TOOLS PANEL LOGIC ================= */
