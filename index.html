@@ -1248,8 +1248,34 @@ footer{
   transform:translateX(-4px);
 }
 
-.trust{
-  padding:30px 6%;
+.trust-card{
+  padding:22px;
+  border-radius:20px;
+  text-align:center;
+  background:linear-gradient(
+    180deg,
+    rgba(255,255,255,.14),
+    rgba(255,255,255,.05)
+  );
+  backdrop-filter:blur(20px);
+  border:1px solid rgba(255,255,255,.15);
+  transition:.35s ease;
+}
+
+.trust-card:hover{
+  transform:translateY(-6px);
+  box-shadow:0 15px 35px rgba(0,0,0,.35);
+}
+
+.trust-card strong{
+  font-size:26px;
+  display:block;
+  font-weight:700;
+}
+
+.trust-card span{
+  font-size:12px;
+  opacity:.7;
 }
 
 .trust-grid{
@@ -1283,10 +1309,46 @@ gap:20px;
 }
 
 .testimoni-card{
-padding:22px;
-border-radius:18px;
-background:rgba(255,255,255,.08);
-backdrop-filter:blur(20px);
+  padding:22px;
+  border-radius:22px;
+  background:linear-gradient(
+    180deg,
+    rgba(255,255,255,.14),
+    rgba(255,255,255,.05)
+  );
+  backdrop-filter:blur(20px);
+  border:1px solid rgba(255,255,255,.15);
+  transition:.35s ease;
+}
+
+.testimoni-card:hover{
+  transform:translateY(-6px);
+  box-shadow:0 20px 40px rgba(0,0,0,.35);
+}
+
+.testi-header{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:12px;
+}
+
+.avatar{
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  background:linear-gradient(135deg,#00ffc6,#00bfa5);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:700;
+  color:#000;
+}
+
+.testimoni-card p{
+  font-size:14px;
+  opacity:.85;
+  line-height:1.5;
 }
 
 .fade-up{
@@ -1364,22 +1426,27 @@ backdrop-filter:blur(20px);
 
 <section class="trust">
   <div class="trust-grid">
-    <div>
-      <strong>50+</strong>
+
+    <div class="trust-card">
+      <strong class="counter" data-count="50">0</strong>
       <span>Unit Terjual</span>
     </div>
-    <div>
-      <strong>100%</strong>
+
+    <div class="trust-card">
+      <strong class="counter" data-count="100">0</strong>
       <span>Legal Aman</span>
     </div>
-    <div>
-      <strong>24 Jam</strong>
-      <span>Respon Cepat</span>
+
+    <div class="trust-card">
+      <strong class="counter" data-count="24">0</strong>
+      <span>Respon Jam</span>
     </div>
-    <div>
-      <strong>Gratis</strong>
-      <span>Konsultasi</span>
+
+    <div class="trust-card">
+      <strong class="counter" data-count="100">0</strong>
+      <span>Konsultasi Gratis</span>
     </div>
+
   </div>
 </section>
 
@@ -1429,18 +1496,36 @@ backdrop-filter:blur(20px);
 <div class="testimoni-grid">
 
 <div class="testimoni-card">
-<p>"Proses cepat dan transparan, sangat membantu sampai akad."</p>
-<strong>— Andri, Bogor</strong>
+  <div class="testi-header">
+    <div class="avatar">A</div>
+    <div>
+      <strong>Andri</strong>
+      <span>Bogor</span>
+    </div>
+  </div>
+  <p>"Proses cepat dan transparan, sangat membantu sampai akad."</p>
 </div>
 
 <div class="testimoni-card">
-<p>"Legal jelas dan dibimbing sampai selesai."</p>
-<strong>— Dina, Depok</strong>
+  <div class="testi-header">
+    <div class="avatar">D</div>
+    <div>
+      <strong>Dina</strong>
+      <span>Depok</span>
+    </div>
+  </div>
+  <p>"Legal jelas dan dibimbing sampai selesai."</p>
 </div>
 
 <div class="testimoni-card">
-<p>"Recommended buat yang cari rumah pertama."</p>
-<strong>— Andi, Jakarta</strong>
+  <div class="testi-header">
+    <div class="avatar">A</div>
+    <div>
+      <strong>Andi</strong>
+      <span>Jakarta</span>
+    </div>
+  </div>
+  <p>"Recommended buat yang cari rumah pertama."</p>
 </div>
 
 </div>
@@ -2171,6 +2256,37 @@ window.addEventListener("scroll",()=>{
     nav.style.background = "rgba(0,0,0,.55)";
   }
 });
+
+const counters = document.querySelectorAll(".counter");
+
+const counterObserver = new IntersectionObserver(entries=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+
+      const el = entry.target;
+      const target = +el.dataset.count;
+      let count = 0;
+
+      const speed = target / 40;
+
+      const update = ()=>{
+        count += speed;
+
+        if(count < target){
+          el.textContent = Math.floor(count);
+          requestAnimationFrame(update);
+        }else{
+          el.textContent = target + (target === 100 ? "%" : "+");
+        }
+      };
+
+      update();
+      counterObserver.unobserve(el);
+    }
+  });
+},{threshold:.6});
+
+counters.forEach(c=>counterObserver.observe(c));
 
 /* ================= TOOLS PANEL LOGIC ================= */
 const toolsPanel   = document.getElementById("toolsPanel");
