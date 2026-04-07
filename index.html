@@ -1682,7 +1682,7 @@ function openModal(i){
       <h4>Simulasi Cicilan</h4>
 
       <label>DP (<span id="dpValue">20%</span>)</label>
-      <input type="range" id="dpRange" min="5" max="50" value="25">
+      <input type="range" id="dpRange" min="0" max="50" value="0">
 
 <label>Tenor</label>
 <div class="tenor-trigger" id="tenorTrigger">
@@ -1766,7 +1766,7 @@ function initCicilan(){
 
     const dpPercent = dpRange.value / 100;
     const tenor     = tenorYear * 12;
-    const bunga     = 0.10 / 12;
+    const bunga     = 0.03 / 12;
 
     const loan = price * (1 - dpPercent);
 
