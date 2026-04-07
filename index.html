@@ -250,21 +250,100 @@ section{
   gap:22px;
 }
 
+/* ================= PREMIUM PROPERTY CARD ================= */
+
 .project-card{
   position:relative;
-  padding-top:64px; /* ruang buat badge */
-  padding:26px 22px;
-  border-radius:18px;
-  background:rgba(255,255,255,.08);
-  backdrop-filter:var(--blur);
-  border:1px solid rgba(255,255,255,.15);
-  transition:.35s ease;
-  cursor:pointer;
+  border-radius:20px;
+  overflow:hidden;
+  min-height:220px;
+  padding:18px;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-end;
+  color:white;
+
+  background:rgba(255,255,255,.06);
+  backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,.12);
+
+  transition:.4s ease;
 }
 
 .project-card:hover{
-  transform:translateY(-6px);
-  box-shadow:0 12px 40px rgba(0,0,0,.4);
+  transform:translateY(-8px);
+  box-shadow:0 25px 50px rgba(0,0,0,.25);
+}
+
+.project-cover{
+  position:absolute;
+  inset:0;
+  background-size:cover;
+  background-position:center;
+  transition:transform .7s ease;
+}
+
+.project-card:hover .project-cover{
+  transform:scale(1.08);
+}
+
+.project-overlay{
+  position:absolute;
+  inset:0;
+  background:linear-gradient(
+    to top,
+    rgba(0,0,0,.85),
+    rgba(0,0,0,.35),
+    transparent
+  );
+}
+
+.card-content{
+  position:relative;
+  z-index:2;
+}
+
+.card-location{
+  font-size:12px;
+  opacity:.8;
+}
+
+.card-title{
+  font-size:16px;
+  font-weight:600;
+  margin:4px 0;
+}
+
+.card-price{
+  font-size:14px;
+  font-weight:500;
+  opacity:.9;
+}
+
+/* badge */
+.card-badge{
+  position:absolute;
+  top:12px;
+  left:12px;
+  background:linear-gradient(45deg,#ff3d3d,#ff7b00);
+  padding:5px 10px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:600;
+  z-index:2;
+}
+
+/* status */
+.card-status{
+  position:absolute;
+  top:12px;
+  right:12px;
+  background:rgba(0,0,0,.6);
+  backdrop-filter:blur(6px);
+  padding:4px 9px;
+  border-radius:999px;
+  font-size:10px;
+  z-index:2;
 }
 
 /* LOGO DI KANAN PROJECT (TANPA JS) */
@@ -1496,7 +1575,7 @@ function renderProjects(){
 
   projects.forEach((p,i)=>{
 
-    const cover = p.media?.[0] 
+    const cover = p.media?.[0]
       ? (p.media[0].startsWith("http")
           ? p.media[0]
           : p.folder + p.media[0])
@@ -1509,19 +1588,21 @@ function renderProjects(){
       <div class="project-cover"
            style="background-image:url('${cover}')"></div>
 
-      <div class="card-badges">
-        ${p.badge ? `
-          <span class="card-badge ${p.badge.type}">
-            ${p.badge.text}
-          </span>
-        ` : ""}
+      <div class="project-overlay"></div>
 
-        <span class="status ${p.status || 'ready'}">
-          ${(p.status || 'READY').toUpperCase()}
-        </span>
+      ${p.badge ? `
+        <div class="card-badge">${p.badge.text}</div>
+      ` : ""}
+
+      <div class="card-status">
+        ${(p.status || "ready").toUpperCase()}
       </div>
 
-      <h3>${p.name}</h3>
+      <div class="card-content">
+        <div class="card-location">📍 ${p.location}</div>
+        <div class="card-title">${p.name}</div>
+        <div class="card-price">${p.price}</div>
+      </div>
     `;
 
     card.onclick = ()=> openModal(i);
@@ -2088,20 +2169,29 @@ window.addEventListener("scroll",()=>{
 });
 
 /* ================= SCROLL ANIMATION ================= */
-const observer = new IntersectionObserver((entries)=>{
+const observer = new IntersectionObserver(entries=>{
   entries.forEach(entry=>{
     if(entry.isIntersecting){
       entry.target.classList.add("show");
     }
   });
-},{
-  threshold:.15
-});
+},{threshold:.15});
 
 document.querySelectorAll(".project-card")
 .forEach((el,i)=>{
+  el.style.opacity = 0;
+  el.style.transform = "translateY(30px)";
+  el.style.transition = "all .6s ease";
   el.style.transitionDelay = (i * .08)+"s";
+
   observer.observe(el);
+});
+
+document.addEventListener("scroll",()=>{
+  document.querySelectorAll(".show").forEach(el=>{
+    el.style.opacity = 1;
+    el.style.transform = "translateY(0)";
+  });
 });
 
 const nav = document.querySelector("nav");
