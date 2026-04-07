@@ -1606,7 +1606,38 @@ function renderProjects(){
     `;
 
     card.onclick = ()=> openModal(i);
+
+    /* reset animasi awal */
+    card.style.opacity = 0;
+    card.style.transform = "translateY(30px)";
+    card.style.transition = "all .5s ease";
+    card.style.transitionDelay = (i * .08)+"s";
+
     grid.appendChild(card);
+
+    /* trigger animasi */
+    setTimeout(()=>{
+      card.style.opacity = 1;
+      card.style.transform = "translateY(0)";
+    },50);
+  });
+
+function applyCardAnimation(){
+  const observer = new IntersectionObserver(entries=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){
+        entry.target.classList.add("show");
+      }
+    });
+  },{threshold:.15});
+
+  document.querySelectorAll(".project-card").forEach((el,i)=>{
+    el.style.opacity = 0;
+    el.style.transform = "translateY(30px)";
+    el.style.transition = "all .6s ease";
+    el.style.transitionDelay = (i * .08)+"s";
+
+    observer.observe(el);
   });
 }
 
