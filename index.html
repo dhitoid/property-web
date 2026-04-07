@@ -1082,6 +1082,47 @@ footer{
   transform:translateX(-4px);
 }
 
+.trust{
+  padding:30px 6%;
+}
+
+.trust-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:16px;
+}
+
+.trust-grid div{
+  padding:18px;
+  border-radius:18px;
+  text-align:center;
+  background:rgba(255,255,255,.08);
+  backdrop-filter:blur(16px);
+}
+
+.trust-grid strong{
+  font-size:20px;
+  display:block;
+}
+
+.trust-grid span{
+  font-size:12px;
+  opacity:.7;
+}
+
+.testimoni-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:20px;
+}
+
+.testimoni-card{
+padding:22px;
+border-radius:18px;
+background:rgba(255,255,255,.08);
+backdrop-filter:blur(20px);
+}
+
 </style>
 </head>
 
@@ -1093,7 +1134,6 @@ footer{
     <strong>Dhito Property</strong>
   </div>
   <div>
-<div>
   <a href="#home">Home</a>
   <a href="#project">Project</a>
   <a href="#contact">Kontak</a>
@@ -1102,9 +1142,37 @@ footer{
 </nav>
 
 <section id="home" class="hero">
-  <h1>Marketing Property Profesional & Terpercaya</h1>
-  <p>Membantu Anda mendapatkan rumah impian dengan proses aman dan transparan.</p>
-  <a href="#project" class="btn primary">Lihat Project</a>
+  <h1>Temukan Rumah Impian Anda</h1>
+  <p>
+    Konsultan properti terpercaya di Bogor. 
+    Pendampingan penuh dari survey hingga akad.
+  </p>
+
+  <div style="display:flex; gap:12px;">
+    <a href="#project" class="btn primary">Lihat Project</a>
+    <a href="https://wa.me/6281802168184" class="btn">Gratis Konsultasi</a>
+  </div>
+</section>
+
+<section class="trust">
+  <div class="trust-grid">
+    <div>
+      <strong>50+</strong>
+      <span>Unit Terjual</span>
+    </div>
+    <div>
+      <strong>100%</strong>
+      <span>Legal Aman</span>
+    </div>
+    <div>
+      <strong>24 Jam</strong>
+      <span>Respon Cepat</span>
+    </div>
+    <div>
+      <strong>Gratis</strong>
+      <span>Konsultasi</span>
+    </div>
+  </div>
 </section>
 
 <section id="why" class="why">
@@ -1145,6 +1213,29 @@ footer{
   <button class="filter-btn" data-filter="sold">Sold</button>
 </div>
   <div id="projectGrid" class="project-grid"></div>
+</section>
+
+<section class="testimoni">
+<h2>Testimoni Client</h2>
+
+<div class="testimoni-grid">
+
+<div class="testimoni-card">
+<p>"Proses cepat dan transparan, sangat membantu sampai akad."</p>
+<strong>— Andri, Bogor</strong>
+</div>
+
+<div class="testimoni-card">
+<p>"Legal jelas dan dibimbing sampai selesai."</p>
+<strong>— Dina, Depok</strong>
+</div>
+
+<div class="testimoni-card">
+<p>"Recommended buat yang cari rumah pertama."</p>
+<strong>— Andi, Jakarta</strong>
+</div>
+
+</div>
 </section>
 
 <section id="contact">
