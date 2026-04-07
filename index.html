@@ -1606,21 +1606,10 @@ function renderProjects(){
     `;
 
     card.onclick = ()=> openModal(i);
-
-    /* reset animasi awal */
-    card.style.opacity = 0;
-    card.style.transform = "translateY(30px)";
-    card.style.transition = "all .5s ease";
-    card.style.transitionDelay = (i * .08)+"s";
-
     grid.appendChild(card);
-
-    /* trigger animasi */
-    setTimeout(()=>{
-      card.style.opacity = 1;
-      card.style.transform = "translateY(0)";
-    },50);
   });
+  applyCardAnimation();
+}
 
 function applyCardAnimation(){
   const observer = new IntersectionObserver(entries=>{
