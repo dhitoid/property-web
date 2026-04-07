@@ -1224,6 +1224,37 @@ backdrop-filter:blur(20px);
   transform:translateY(0);
 }
 
+.project-cover{
+  position:absolute;
+  inset:0;
+  border-radius:18px;
+  background-size:cover;
+  background-position:center;
+  opacity:.35;
+}
+
+.project-card h3{
+  position:relative;
+  z-index:2;
+}
+
+.project-filter{
+  position:sticky;
+  top:70px;
+  z-index:20;
+  background:rgba(0,0,0,.35);
+  backdrop-filter:blur(12px);
+  padding:10px;
+  border-radius:14px;
+}
+
+.card-price{
+  display:block;
+  margin-top:6px;
+  font-size:13px;
+  opacity:.8;
+}
+
 </style>
 </head>
 
@@ -1423,15 +1454,15 @@ backdrop-filter:blur(20px);
 
   <div class="tools-menu">
     <a href="https://dhitoid.github.io/DT-PRO-WEB/" target="_blank">
-      🧮 Kalkulator KPR
+      Kalkulator KPR
     </a>
 
     <a href="https://dhitoid.github.io/prompt-toolkit-bydhito/" target="_blank">
-      🤖 Prompt AI
+      Prompt AI
     </a>
     
     <a href="https://dhitoid.github.io/Virtual-Home-Tour-By-Dhito/" target="_blank">
-      🎥 Virtual Home
+      Virtual Home
     </a>
   </div>
 </aside>
@@ -1464,23 +1495,33 @@ function renderProjects(){
   grid.innerHTML = "";
 
   projects.forEach((p,i)=>{
+
+    const cover = p.media?.[0] 
+      ? (p.media[0].startsWith("http")
+          ? p.media[0]
+          : p.folder + p.media[0])
+      : "";
+
     const card = document.createElement("div");
     card.className = "project-card";
 
     card.innerHTML = `
-      <!-- BADGE WRAPPER -->
-      <div class="card-badges">
+      <div class="project-cover"
+           style="background-image:url('${cover}')"></div>
 
+      <div class="card-badges">
         ${p.badge ? `
           <span class="card-badge ${p.badge.type}">
             ${p.badge.text}
           </span>
+          
+          <h3>${p.name}</h3>
+          <span class="card-price">${p.price}</span>
         ` : ""}
 
         <span class="status ${p.status || 'ready'}">
           ${(p.status || 'READY').toUpperCase()}
         </span>
-
       </div>
 
       <h3>${p.name}</h3>
@@ -2060,11 +2101,20 @@ const observer = new IntersectionObserver((entries)=>{
   threshold:.15
 });
 
-document.querySelectorAll(
-  "section, .project-card, .why-card, .testimoni-card"
-).forEach(el=>{
-  el.classList.add("fade-up");
+document.querySelectorAll(".project-card")
+.forEach((el,i)=>{
+  el.style.transitionDelay = (i * .08)+"s";
   observer.observe(el);
+});
+
+const nav = document.querySelector("nav");
+
+window.addEventListener("scroll",()=>{
+  if(window.scrollY > 40){
+    nav.style.background = "rgba(0,0,0,.75)";
+  }else{
+    nav.style.background = "rgba(0,0,0,.55)";
+  }
 });
 
 /* ================= TOOLS PANEL LOGIC ================= */
