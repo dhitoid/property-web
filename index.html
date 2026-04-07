@@ -1569,65 +1569,60 @@ fetch("projects.json")
     generateSchema();
   });
 
-function renderProjects(){
+function createProjectCard(p,index){
+  const cover = p.media?.[0]
+    ? (p.media[0].startsWith("http")
+        ? p.media[0]
+        : p.folder + p.media[0])
+    : "";
+
+  const card = document.createElement("div");
+  card.className = "project-card";
+
+  card.innerHTML = `
+    <div class="project-cover"
+         style="background-image:url('${cover}')"></div>
+
+    <div class="project-overlay"></div>
+
+    ${p.badge ? `
+      <div class="card-badge ${p.badge.type}">
+        ${p.badge.text}
+      </div>
+    ` : ""}
+
+    <div class="card-status">
+      ${(p.status || "ready").toUpperCase()}
+    </div>
+
+    <div class="card-content">
+      <div class="card-location">📍 ${p.location}</div>
+      <div class="card-title">${p.name}</div>
+      <div class="card-price">${p.price}</div>
+    </div>
+  `;
+
+  card.onclick = ()=> openModal(index);
+  return card;
+}
+
+function renderProjects(list = projects){
   const grid = document.getElementById("projectGrid");
   grid.innerHTML = "";
 
-  projects.forEach((p,i)=>{
-
-    const cover = p.media?.[0]
-      ? (p.media[0].startsWith("http")
-          ? p.media[0]
-          : p.folder + p.media[0])
-      : "";
-
-    const card = document.createElement("div");
-    card.className = "project-card";
-
-    card.innerHTML = `
-      <div class="project-cover"
-           style="background-image:url('${cover}')"></div>
-
-      <div class="project-overlay"></div>
-
-      ${p.badge ? `
-        <div class="card-badge">${p.badge.text}</div>
-      ` : ""}
-
-      <div class="card-status">
-        ${(p.status || "ready").toUpperCase()}
-      </div>
-
-      <div class="card-content">
-        <div class="card-location">📍 ${p.location}</div>
-        <div class="card-title">${p.name}</div>
-        <div class="card-price">${p.price}</div>
-      </div>
-    `;
-
-    card.onclick = ()=> openModal(i);
-    grid.appendChild(card);
+  list.forEach(p=>{
+    const index = projects.indexOf(p);
+    grid.appendChild(createProjectCard(p,index));
   });
-  applyCardAnimation();
 }
 
-function applyCardAnimation(){
-  const observer = new IntersectionObserver(entries=>{
-    entries.forEach(entry=>{
-      if(entry.isIntersecting){
-        entry.target.classList.add("show");
-      }
-    });
-  },{threshold:.15});
+function applyProjectFilter(type){
+  const filtered =
+    type === "all"
+      ? projects
+      : projects.filter(p => (p.status || "ready") === type);
 
-  document.querySelectorAll(".project-card").forEach((el,i)=>{
-    el.style.opacity = 0;
-    el.style.transform = "translateY(30px)";
-    el.style.transition = "all .6s ease";
-    el.style.transitionDelay = (i * .08)+"s";
-
-    observer.observe(el);
-  });
+  renderProjects(filtered);
 }
 
 /* =========================
