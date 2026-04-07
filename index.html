@@ -2070,48 +2070,9 @@ filterButtons.forEach(btn=>{
     btn.classList.add("active");
 
     const type = btn.dataset.filter;
-    applyProjectFilter(type);
+    renderProjects(type); // 🔥 pakai render yang sama
   });
 });
-
-function applyProjectFilter(type){
-  const grid = document.getElementById("projectGrid");
-  grid.innerHTML = "";
-
-  const filtered =
-    type === "all"
-      ? projects
-      : projects.filter(p => (p.status || "ready") === type);
-
-  filtered.forEach(p=>{
-    const index = projects.indexOf(p);
-
-    const card = document.createElement("div");
-    card.className = "project-card";
-
-    card.innerHTML = `
-      <!-- BADGE WRAPPER -->
-      <div class="card-badges">
-
-        ${p.badge ? `
-          <span class="card-badge ${p.badge.type}">
-            ${p.badge.text}
-          </span>
-        ` : ""}
-
-        <span class="status ${p.status || 'ready'}">
-          ${(p.status || 'READY').toUpperCase()}
-        </span>
-
-      </div>
-
-      <h3>${p.name}</h3>
-    `;
-
-    card.onclick = ()=> openModal(index);
-    grid.appendChild(card);
-  });
-}
 
 window.addEventListener("scroll",()=>{
   if(window.scrollY < 80){
