@@ -2083,7 +2083,7 @@ function closeTools(){
   document.body.style.overflow = "";
 }
 
-/* ================= AUTO SCHEMA PROPERTY ================= */
+/* ================= AUTO SCHEMA PROPERTY (MATCH projects.json) ================= */
 function generateSchema(){
   if(!projects || !projects.length) return;
 
@@ -2095,33 +2095,25 @@ function generateSchema(){
   projects.forEach(p=>{
     schema["@graph"].push({
       "@type":"Offer",
+      "name": p.name,
+      "description": p.description,
+      "availability":
+        p.status === "ready"
+          ? "https://schema.org/InStock"
+          : "https://schema.org/SoldOut",
+      "price": p.priceValue,
+      "priceCurrency":"IDR",
+      "url":"https://dhitoid.github.io/property-web/",
       "itemOffered":{
         "@type":"House",
         "name": p.name,
-        "description": p.description || "",
+        "description": p.description,
         "address":{
           "@type":"PostalAddress",
-          "addressLocality": p.location || "Bogor",
+          "addressLocality": p.location,
           "addressCountry":"ID"
-        },
-        "floorSize":{
-          "@type":"QuantitativeValue",
-          "value": p.buildingSize || 36,
-          "unitCode":"MTK"
-        },
-        "lotSize":{
-          "@type":"QuantitativeValue",
-          "value": p.landSize || 60,
-          "unitCode":"MTK"
         }
-      },
-      "price": p.priceValue || "",
-      "priceCurrency":"IDR",
-      "availability":
-        p.status === "sold"
-          ? "https://schema.org/SoldOut"
-          : "https://schema.org/InStock",
-      "url":"https://dhitoid.github.io/property-web/"
+      }
     });
   });
 
