@@ -29,7 +29,7 @@
   
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
+  "@context": "https://schema.org",awa
   "@type": "RealEstateAgent",
   "name": "Dhito Property",
   "url": "https://dhitopropertyid.netlify.app/",
@@ -1609,6 +1609,21 @@ gap:20px;
   transform:translateY(0);
 }
 
+.ai-panel.return{
+  animation: returnChat .35s cubic-bezier(.22,.61,.36,1);
+}
+
+@keyframes returnChat{
+  from{
+    transform:translateY(20px);
+    opacity:.5;
+  }
+  to{
+    transform:translateY(0);
+    opacity:1;
+  }
+}
+
 /* HEADER */
 .ai-header{
   display:flex;
@@ -1725,6 +1740,39 @@ gap:20px;
 .chat-card span{
   font-size:12px;
   opacity:.7;
+}
+
+.msg-text{
+  font-size:14px;
+  line-height:1.4;
+}
+
+.msg-cta{
+  margin-top:10px;
+  padding:10px 14px;
+  border-radius:14px;
+  border:none;
+  background:linear-gradient(135deg,#0A84FF,#0066FF);
+  color:#fff;
+  font-size:13px;
+  font-weight:500;
+  cursor:pointer;
+
+  transition:.2s;
+  opacity:0;
+  transform:translateY(6px);
+  animation:ctaIn .3s ease forwards;
+}
+
+@keyframes ctaIn{
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+.msg-cta:active{
+  transform:scale(.96);
 }
 
 </style>
@@ -2013,6 +2061,13 @@ let fsIndex = 0;
 let fsItems = [];
 let dotsTimer = null;
 
+let userMemory = {
+  name: null,
+  interest: null,
+  budget: null,
+  lastSeen: null
+};
+
 function findProjectByKeyword(query){
   query = query.toLowerCase();
 
@@ -2193,23 +2248,79 @@ function detectIntent(text){
 
   text = text.toLowerCase();
 
-  if(text.includes("cicilan") || text.includes("kpr")){
-    return "finance";
+  if(text.includes("nama saya")){
+    userMemory.name = text.split("nama saya")[1].trim();
+    return "save_name";
   }
 
-  if(text.includes("survey") || text.includes("lihat lokasi")){
-    return "visit";
+  if(text.includes("500") || text.includes("600")){
+    userMemory.budget = text.match(/\d+/)[0];
+    return "budget";
   }
 
-  if(text.includes("minat") || text.includes("mau") || text.includes("ambil")){
-    return "hot";
+  if(text.includes("2 kamar")){
+    userMemory.interest = "2BR";
+    return "interest";
   }
 
-  if(text.includes("wa") || text.includes("nomor")){
-    return "closing";
+  if(text.includes("lokasi")){
+    return "location";
   }
 
-  return "normal";
+  if(text.includes("survey")){
+    return "survey";
+  }
+
+  return "default";
+}
+
+function getAIReply(intent){
+
+  switch(intent){
+
+    case "save_name":
+      return `Siap ${userMemory.name}, aku bantu carikan unit terbaik ya 😊`;
+
+    case "budget":
+      return `Di range ${userMemory.budget} juta ada beberapa unit cocok 👌 Mau aku rekomendasikan?`;
+
+    case "interest":
+      return `Unit 2 kamar lagi banyak promo 🔥 Mau aku kirim detailnya?`;
+
+    case "location":
+      return `Lokasinya dekat BSD & Puspitek, akses gampang 👍`;
+
+    case "survey":
+      return `Boleh banget! Weekend ini ada slot kosong 👀 Mau Sabtu atau Minggu?`;
+
+    default:
+      return `Aku bantu ya 😊 Lagi cari rumah seperti apa?`;
+  }
+}
+
+let followTimer;
+
+function startFollowUp(){
+
+  clearTimeout(followTimer);
+
+  followTimer = setTimeout(()=>{
+
+    if(userMemory.interest){
+
+      addMessage("ai",
+        `By the way, unit ${userMemory.interest} lagi banyak diminati loh 👀`
+      );
+
+    }else{
+
+      addMessage("ai",
+        `Aku bisa bantu rekomendasikan unit terbaik buat kamu 😊`
+      );
+
+    }
+
+  }, 60000); // 15 detik idle
 }
 
 function showCTA(){
@@ -2238,6 +2349,54 @@ function showCTA(){
   messages.appendChild(el);
   messages.scrollTop = messages.scrollHeight;
 }
+
+function islandSync(type, data = {}){
+
+  switch(type){
+
+    case "chat_open":
+      setIsland("activity");
+      break;
+
+    case "typing":
+      icon.textContent = "⌨️";
+      title.textContent = "Sedang Mengetik";
+      desc.textContent = "AI merespon...";
+      action.textContent = "";
+      island.classList.add("active");
+      break;
+
+    case "reply":
+      setIsland("success");
+      break;
+
+    case "cta":
+      icon.textContent = "⚡";
+      title.textContent = data.title || "Rekomendasi";
+      desc.textContent = data.desc || "Unit cocok ditemukan";
+      action.textContent = "→";
+      island.classList.add("active");
+      break;
+
+    case "modal":
+      icon.textContent = "🏡";
+      title.textContent = "Detail Unit";
+      desc.textContent = "Lihat informasi lengkap";
+      action.textContent = "";
+      island.classList.add("active");
+      break;
+  }
+}
+
+function openAI(){
+  document.getElementById("aiPanel").classList.add("show");
+  islandSync("chat_open");
+}
+
+card.addEventListener("click", ()=>{
+  openModal(data);
+  islandSync("modal");
+});
 
 /* =========================
    FETCH & RENDER PROJECT
@@ -2340,24 +2499,81 @@ const input = document.getElementById("aiInput");
 aiBtn.onclick = ()=> panel.classList.add("active");
 function closeAI(){ panel.classList.remove("active"); }
 
-/* ===== ADD MESSAGE ===== */
-function addMsg(text, type){
+/* ===== ADD MESSAGE (CTA READY) ===== */
+function addMsg(text, type, extra = null){
+
   const el = document.createElement("div");
   el.className = "msg " + type;
-  el.innerText = text;
+
+  let html = `<div class="msg-text">${text}</div>`;
+
+  /* CTA SUPPORT */
+  if(extra && extra.cta){
+    html += `
+      <button class="msg-cta" data-link="${extra.cta.link}">
+        ${extra.cta.label}
+      </button>
+    `;
+  }
+
+  el.innerHTML = html;
+
   messages.appendChild(el);
+
+  /* bind CTA click */
+  const btn = el.querySelector(".msg-cta");
+  if(btn){
+    btn.onclick = () => {
+
+      window.open(btn.dataset.link, "_blank");
+
+      islandSync("cta", {
+        title:"Menghubungkan",
+        desc:"Menuju WhatsApp"
+      });
+
+    };
+  }
+
   messages.scrollTop = messages.scrollHeight;
 }
 
 /* ===== SEND ===== */
 function sendMessage(){
-  const text = input.value.trim();
+
+  const input = document.getElementById("chatInput");
+  const text = input.value;
+
   if(!text) return;
 
-  addMsg(text,"user");
-  input.value = "";
+  addMessage("user", text);
+  islandSync("typing");
 
-  fakeAI(text);
+  setTimeout(()=>{
+    hideTyping();
+    addMessage("ai", reply);
+  
+    islandSync("reply");
+  
+  },1200);
+
+  const intent = detectIntent(text);
+
+  setTimeout(()=>{
+    showTyping();
+
+    setTimeout(()=>{
+      hideTyping();
+
+      addMessage("ai", getAIReply(intent));
+
+      startFollowUp();
+
+    },1200);
+
+  },300);
+
+  input.value = "";
 }
 
 /* ===== FAKE AI LOGIC ===== */
@@ -2383,12 +2599,16 @@ function fakeAI(q){
         results.forEach(addProjectCard);
       }
 
-      addMsg("Mau saya bantu amankan unit atau langsung hubungkan ke admin?", "bot");
-
-      speak("Unit ini masih tersedia, saya bisa bantu lanjutkan ke admin");
-
-      showCTA();
-
+      addMsg(
+        "Mau saya bantu amankan unit atau langsung hubungkan ke admin?",
+        "bot",
+        {
+          cta:{
+            label:"Chat WhatsApp Sekarang",
+            link:"https://wa.me/6281802168184"
+          }
+        }
+      );
       return;
     }
 
@@ -2864,15 +3084,44 @@ document.querySelector(".media-sheet").addEventListener("click",e=>{
 /* =========================
    MODAL CLOSE & SWIPE
    ========================= */
+//function closeModal(){
+  ///const sheet = document.querySelector(".sheet");
+  //sheet.style.transform = "translate(-50%,100%)";
+
+  ///setTimeout(()=>{
+    //document.getElementById("modal").classList.remove("active");
+    //document.body.classList.remove("modal-open");
+    //sheet.style.transform = "";
+  //},350);
+//}
+
 function closeModal(){
-  const sheet = document.querySelector(".sheet");
-  sheet.style.transform = "translate(-50%,100%)";
+
+  const modal = document.getElementById("modal");
+  const chat  = document.getElementById("aiPanel");
+  const input = document.getElementById("aiInput");
+
+  modal.classList.remove("show");
 
   setTimeout(()=>{
-    document.getElementById("modal").classList.remove("active");
-    document.body.classList.remove("modal-open");
-    sheet.style.transform = "";
-  },350);
+
+    /* balik ke chat */
+    chat.classList.add("show");
+    chat.classList.add("return");
+
+    /* focus tanpa zoom glitch */
+    input.focus();
+    input.blur();
+    setTimeout(()=> input.focus(), 50);
+
+    /* island sync */
+    islandSync("chat_open");
+
+  },200);
+
+  setTimeout(()=>{
+    chat.classList.remove("return");
+  },400);
 }
 
 function initSwipe(){
