@@ -1481,6 +1481,7 @@ gap:20px;
   box-shadow:
     0 10px 30px rgba(0,0,0,.45),
     inset 0 1px 0 rgba(255,255,255,.08);
+  backdrop-filter:blur(20px) saturate(160%);
 }
 
 /* ACTIVE SIZE */
@@ -1488,6 +1489,7 @@ gap:20px;
   width:320px;
   height:90px;
   border-radius:26px;
+  transform:translateX(-50%) scale(.97);
 }
 
 /* MINI */
@@ -1502,6 +1504,7 @@ gap:20px;
 
 .island.active .island-mini{
   opacity:0;
+  transform:translateX(-50%) scale(.97);
 }
 
 /* STACK */
@@ -1522,7 +1525,7 @@ gap:20px;
   padding:0 16px;
 
   opacity:0;
-  transform:translateY(10px);
+  transform:translateY(6px);
   transition:.35s cubic-bezier(.22,.61,.36,1);
 }
 
@@ -1575,7 +1578,7 @@ gap:20px;
     <div class="island-mini"></div>
 
     <!-- STACK CONTAINER -->
-    <div class="island-stack" id="islandStack"></div>
+  <!--  <div class="island-stack" id="islandStack"></div> -->
 
   </div>
 </div>
@@ -1723,7 +1726,7 @@ gap:20px;
   </div>
 </section>
 
-<footer>© 2026 Nour Maandhito — Marketing Property</footer>
+<footer>© 2026 Dhito — Marketing Property</footer>
 
 <!-- MODAL -->
 <div id="modal" class="modal">
@@ -1915,6 +1918,124 @@ function enableZoom(img){
   };
 }
 
+const islandEl = document.getElementById("dynamicIsland");
+
+let startY = 0;
+let currentY = 0;
+let dragging = false;
+
+islandEl.addEventListener("touchstart",e=>{
+  startY = e.touches[0].clientY;
+  dragging = true;
+  islandEl.style.transition = "none";
+});
+
+islandEl.addEventListener("touchmove",e=>{
+  if(!dragging) return;
+
+  currentY = e.touches[0].clientY;
+  let diff = currentY - startY;
+
+  if(diff < 0) diff = 0;
+  if(diff > 120) diff = 120;
+
+  /* progress */
+  const progress = diff / 120;
+
+  /* dynamic size */
+  const width  = 120 + (200 * progress);
+  const height = 36 + (50 * progress);
+
+  islandEl.querySelector(".island-wrap").style.width  = width + "px";
+  islandEl.querySelector(".island-wrap").style.height = height + "px";
+
+  islandEl.style.transform = `translateX(-50%) translateY(${diff * 0.3}px)`;
+});
+
+islandEl.addEventListener("touchend",()=>{
+  dragging = false;
+
+  islandEl.style.transition = "all .4s cubic-bezier(.22,.61,.36,1)";
+  islandEl.style.transform = "translateX(-50%) translateY(0)";
+
+  /* snap */
+  if(currentY - startY > 60){
+    islandEl.classList.add("active");
+  }else{
+    islandEl.classList.remove("active");
+  }
+});
+
+let userState = {
+  lastScroll: 0,
+  idleTime: 0,
+  interest: null
+};
+
+/* ===== SCROLL DETECT ===== */
+window.addEventListener("scroll",()=>{
+  userState.lastScroll = Date.now();
+
+  if(window.scrollY > 400){
+    triggerAI("deepScroll");
+  }
+});
+
+/* ===== CLICK PROJECT ===== */
+document.addEventListener("click",(e)=>{
+  if(e.target.closest(".project-card")){
+    userState.interest = "project";
+    triggerAI("viewProject");
+  }
+});
+
+/* ===== IDLE DETECT ===== */
+setInterval(()=>{
+  userState.idleTime += 1;
+
+  if(userState.idleTime > 6){
+    triggerAI("idle");
+    userState.idleTime = 0;
+  }
+},1000);
+
+/* reset idle kalau user gerak */
+["scroll","click","touchstart"].forEach(evt=>{
+  document.addEventListener(evt,()=>{
+    userState.idleTime = 0;
+  });
+});
+
+function triggerAI(type){
+
+  switch(type){
+
+    case "viewProject":
+      pushIsland({
+        icon:"🔥",
+        title:"Unit Banyak Diminati",
+        desc:"Segera booking sebelum habis"
+      });
+      break;
+
+    case "deepScroll":
+      pushIsland({
+        icon:"💡",
+        title:"Butuh Bantuan?",
+        desc:"Kami bisa bantu pilih unit terbaik"
+      });
+      break;
+
+    case "idle":
+      pushIsland({
+        icon:"👋",
+        title:"Masih bingung?",
+        desc:"Konsultasi gratis sekarang"
+      });
+      break;
+  }
+}
+
 const island = document.getElementById("dynamicIsland");
 const stack  = document.getElementById("islandStack");
 
@@ -2079,6 +2200,24 @@ document.addEventListener("click",(e)=>{
 document.querySelectorAll('a[href*="wa.me"]').forEach(btn=>{
   btn.addEventListener("click",()=>{
     pushIsland(islandState("chat"));
+  });
+});
+
+document.querySelectorAll('a[href*="wa.me"]').forEach(btn=>{
+  btn.addEventListener("mouseenter",()=>{
+    pushIsland({
+      icon:"⚡",
+      title:"Respon Cepat",
+      desc:"Tim kami siap bantu sekarang"
+    });
+  });
+
+  btn.addEventListener("click",()=>{
+    pushIsland({
+      icon:"💬",
+      title:"Menghubungkan...",
+      desc:"Ke WhatsApp marketing"
+    });
   });
 });
 
