@@ -2500,41 +2500,27 @@ aiBtn.onclick = ()=> panel.classList.add("active");
 function closeAI(){ panel.classList.remove("active"); }
 
 /* ===== ADD MESSAGE (CTA READY) ===== */
-function addMsg(text, type, extra = null){
-
+function addMsg(text, type, options = {}){
   const el = document.createElement("div");
   el.className = "msg " + type;
 
-  let html = `<div class="msg-text">${text}</div>`;
-
-  /* CTA SUPPORT */
-  if(extra && extra.cta){
-    html += `
-      <button class="msg-cta" data-link="${extra.cta.link}">
-        ${extra.cta.label}
-      </button>
-    `;
+  /* TEXT */
+  const textEl = document.createElement("div");
+  textEl.className = "msg-text";
+  textEl.innerText = text;
+  el.appendChild(textEl);
+  
+  /* CTA (optional) */
+  if(options.cta){
+    const cta = document.createElement("a");
+    cta.className = "msg-cta";
+    cta.innerText = options.cta.label;
+    cta.href = options.cta.link;
+    cta.target = "_blank";
+    el.appendChild(cta);
   }
-
-  el.innerHTML = html;
 
   messages.appendChild(el);
-
-  /* bind CTA click */
-  const btn = el.querySelector(".msg-cta");
-  if(btn){
-    btn.onclick = () => {
-
-      window.open(btn.dataset.link, "_blank");
-
-      islandSync("cta", {
-        title:"Menghubungkan",
-        desc:"Menuju WhatsApp"
-      });
-
-    };
-  }
-
   messages.scrollTop = messages.scrollHeight;
 }
 
@@ -2576,7 +2562,6 @@ function sendMessage(){
   input.value = "";
 }
 
-/* ===== FAKE AI LOGIC ===== */
 function fakeAI(q){
 
   showTyping();
@@ -2589,9 +2574,8 @@ function fakeAI(q){
     const results = filterProjects(q);
 
     /* =========================
-       HOT LEAD RESPONSE
+       HOT LEAD
     ========================= */
-
     if(intent === "hot"){
       addMsg("🔥 Wah cocok nih, unitnya lagi tersedia!", "bot");
 
@@ -2609,13 +2593,14 @@ function fakeAI(q){
           }
         }
       );
+
+      speak("Unit ini masih tersedia, saya bisa bantu lanjutkan ke admin");
       return;
     }
 
     /* =========================
-       CICILAN / FINANCE
+       FINANCE
     ========================= */
-
     if(intent === "finance"){
       addMsg("Saya bantu hitung cicilan ya 😊", "bot");
 
@@ -2626,14 +2611,12 @@ function fakeAI(q){
       addMsg("Mau saya hitungkan simulasi cicilan lengkap?", "bot");
 
       speak("Saya bisa bantu hitung cicilan untuk kamu");
-
       return;
     }
 
     /* =========================
-       SURVEY INTENT
+       VISIT
     ========================= */
-
     if(intent === "visit"){
       addMsg("Kita bisa jadwalkan survey langsung ke lokasi 👍", "bot");
 
@@ -2641,19 +2624,24 @@ function fakeAI(q){
         results.forEach(addProjectCard);
       }
 
-      addMsg("Kapan rencana mau datang? Saya bantu atur jadwalnya.", "bot");
+      addMsg(
+        "Kapan mau survey? Saya bantu booking jadwal.",
+        "bot",
+        {
+          cta:{
+            label:"Booking Survey via WhatsApp",
+            link:"https://wa.me/6281802168184"
+          }
+        }
+      );
 
       speak("Kita bisa jadwalkan survey ke lokasi");
-
-      showCTA();
-
       return;
     }
 
     /* =========================
-       NORMAL FLOW
+       NORMAL
     ========================= */
-
     if(results.length){
       addMsg("Saya temukan beberapa yang cocok 👇","bot");
       results.forEach(addProjectCard);
@@ -2661,7 +2649,7 @@ function fakeAI(q){
       return;
     }
 
-    /* fallback */
+    /* FALLBACK */
     const res = "Saya bisa bantu carikan rumah sesuai kebutuhan kamu 😊";
     addMsg(res,"bot");
     speak(res);
