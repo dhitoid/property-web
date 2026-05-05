@@ -108,9 +108,47 @@
   --muted:rgba(255,255,255,.7);
 }
 
+/* ================= IOS DEPTH SYSTEM ================= */
+:root{
+  --ios-ease:cubic-bezier(.22,.61,.36,1);
+  --ios-bounce:cubic-bezier(.34,1.56,.64,1);
+}
+
+/* Glass lebih realistis */
+.glass{
+  background:rgba(255,255,255,.12);
+  backdrop-filter:blur(30px) saturate(180%);
+  -webkit-backdrop-filter:blur(30px) saturate(180%);
+  border:1px solid rgba(255,255,255,.18);
+}
+
+/* Shadow ala Apple (soft + depth) */
+.soft-shadow{
+  box-shadow:
+    0 8px 20px rgba(0,0,0,.25),
+    inset 0 1px 0 rgba(255,255,255,.15);
+}
+
+/* Hover jadi subtle (iOS ga lebay) */
+.project-card:hover{
+  transform:translateY(-4px) scale(1.01);
+}
+
+/* Active (tap feel) */
+.project-card:active{
+  transform:scale(.97);
+}
+
 /* ================= GLOBAL ================= */
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
+
+*{
+  transition:
+    background .35s var(--ios-ease),
+    transform .35s var(--ios-ease),
+    box-shadow .35s var(--ios-ease);
+}
 
 body{
   margin:0;
@@ -214,6 +252,7 @@ section{
   justify-content:center;
   align-items:center;
   text-align:center;
+  transform:translateY(calc(var(--scroll) * -0.05px));
 }
 
 .hero h1{
@@ -241,6 +280,24 @@ section{
 .btn.primary{
   background:white;
   color:black;
+}
+
+.btn{
+  position:relative;
+  overflow:hidden;
+}
+
+.btn::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:rgba(255,255,255,.2);
+  opacity:0;
+  transition:.3s;
+}
+
+.btn:active::after{
+  opacity:1;
 }
 
 /* ================= PROJECT ================= */
@@ -498,7 +555,9 @@ footer{
   border-radius:28px 28px 0 0;
   transform:translate(-50%,100%);
   transition:.55s cubic-bezier(.22,.61,.36,1);
+  box-shadow:0 -10px 40px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.15);
 }
+
 .modal.active .sheet{transform:translate(-50%,0)}
 
 .sheet-handle{
@@ -1393,10 +1452,48 @@ gap:20px;
   opacity:.8;
 }
 
+/* ================= DYNAMIC ISLAND ================= */
+.island{
+  position:fixed;
+  top:14px;
+  left:50%;
+  transform:translateX(-50%);
+  width:130px;
+  height:36px;
+  background:black;
+  border-radius:50px;
+  z-index:9999;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  transition:all .5s var(--ios-ease);
+  box-shadow:0 10px 30px rgba(0,0,0,.4);
+}
+
+.island.expand{
+  width:320px;
+  height:90px;
+  border-radius:28px;
+}
+
+.island-content{
+  font-size:13px;
+  opacity:.85;
+  transition:.3s;
+}
+
 </style>
 </head>
 
 <body>
+  
+<div id="dynamicIsland" class="island">
+  <div class="island-content" id="islandContent">
+    🚀 Siap bantu cari rumah
+  </div>
+</div>
 
 <nav>
   <div class="nav-brand">
@@ -1414,7 +1511,7 @@ gap:20px;
 <section id="home" class="hero">
   <h1>Temukan Rumah Impian Anda</h1>
   <p>
-    Konsultan properti terpercaya di Bogor. 
+    Konsultan properti terpercaya di Tangsel & Bogor. 
     Pendampingan penuh dari survey hingga akad.
   </p>
 
@@ -1732,6 +1829,52 @@ function enableZoom(img){
     img.style.transform = zoomed ? "scale(2)" : "scale(1)";
   };
 }
+
+const island = document.getElementById("dynamicIsland");
+const islandContent = document.getElementById("islandContent");
+
+/* trigger random promo */
+function showIsland(msg){
+  islandContent.innerHTML = msg;
+  island.classList.add("expand");
+
+  setTimeout(()=>{
+    island.classList.remove("expand");
+  },3000);
+}
+
+/* contoh trigger */
+setTimeout(()=>{
+  showIsland("🔥 Promo Tanpa DP aktif!");
+},2000);
+
+setInterval(()=>{
+  const msgs = [
+    "🔥 2 unit tersisa hari ini",
+    "👤 5 orang lagi lihat project ini",
+    "💬 Ada chat masuk dari buyer",
+  ];
+
+  const random = msgs[Math.floor(Math.random()*msgs.length)];
+  showIsland(random);
+},12000);
+
+/* pas klik project */
+document.addEventListener("click",(e)=>{
+  if(e.target.closest(".project-card")){
+    showIsland("👀 1 orang lagi lihat unit ini");
+  }
+});
+
+document.addEventListener("touchstart",()=>{}, {passive:true});
+
+/* inertia scroll feel */
+document.addEventListener("scroll",()=>{
+  document.body.style.setProperty(
+    '--scroll',
+    window.scrollY
+  );
+});
 
 
 /* =========================
@@ -2238,6 +2381,24 @@ document.querySelectorAll(".project-card")
   el.style.transitionDelay = (i * .08)+"s";
 
   observer.observe(el);
+});
+
+document.querySelectorAll(".project-card").forEach(card=>{
+  card.addEventListener("mousemove",e=>{
+    const rect = card.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    card.style.background = `
+      radial-gradient(circle at ${x}px ${y}px,
+      rgba(255,255,255,.18),
+      transparent 60%)
+    `;
+  });
+
+  card.addEventListener("mouseleave",()=>{
+    card.style.background = "rgba(255,255,255,.06)";
+  });
 });
 
 document.addEventListener("scroll",()=>{
