@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <link rel="canonical" href="https://dhitopropertyid.netlify.app/">
 <meta name="robots" content="index, follow">
 <title>Dhito Property | Marketing Property</title>
@@ -1590,6 +1590,7 @@ gap:20px;
   left:0;
   right:0;
   height:75vh;
+  max-height:calc(100vh - env(safe-area-inset-bottom));
 
   background:rgba(15,15,15,.9);
   backdrop-filter:blur(20px);
@@ -1665,6 +1666,7 @@ gap:20px;
   padding:10px 14px;
   background:#1a1a1a;
   color:white;
+  font-size:16px;
 }
 
 .ai-input button{
@@ -1700,6 +1702,29 @@ gap:20px;
 @keyframes blink{
   0%,80%,100%{opacity:.2}
   40%{opacity:1}
+}
+
+.chat-card{
+  background:rgba(255,255,255,.08);
+  border-radius:16px;
+  padding:12px;
+  margin-top:6px;
+}
+
+.chat-card img{
+  width:100%;
+  border-radius:12px;
+  margin-bottom:8px;
+}
+
+.chat-card strong{
+  display:block;
+  font-size:14px;
+}
+
+.chat-card span{
+  font-size:12px;
+  opacity:.7;
 }
 
 </style>
@@ -2087,6 +2112,70 @@ Budget kamu berapa? saya carikan yang paling cocok 🔥`;
   //speechSynthesis.speak(utter);
 //}
 
+function extractBudget(text){
+  const match = text.match(/(\d+)\s?(jt|juta|m)/i);
+  if(!match) return null;
+
+  let value = parseInt(match[1]);
+
+  if(match[2].toLowerCase().includes("m")){
+    value *= 1000;
+  }
+
+  return value * 1000000;
+}
+
+function filterProjects(text){
+
+  const budget = extractBudget(text);
+  const query  = text.toLowerCase();
+
+  return projects.filter(p=>{
+
+    let match = true;
+
+    if(budget){
+      match = match && p.priceValue <= budget;
+    }
+
+    if(query.includes("bogor")){
+      match = match && p.location.toLowerCase().includes("bogor");
+    }
+
+    if(query.includes("depok")){
+      match = match && p.location.toLowerCase().includes("depok");
+    }
+
+    if(query.includes("bsd") || query.includes("serpong")){
+      match = match && p.location.toLowerCase().includes("bsd");
+    }
+
+    return match;
+
+  }).slice(0,3); // max 3 biar clean
+}
+
+function addProjectCard(p){
+
+  const el = document.createElement("div");
+  el.className = "msg bot";
+
+  el.innerHTML = `
+    <div class="chat-card">
+      <img src="${p.media?.[0] || ''}">
+      <strong>${p.name}</strong>
+      <span>📍 ${p.location}</span><br>
+      <span>💰 ${p.price}</span>
+    </div>
+  `;
+
+  messages.appendChild(el);
+  messages.scrollTop = messages.scrollHeight;
+
+  el.onclick = ()=>{
+    openModal(projects.indexOf(p));
+  };
+}
 
 /* =========================
    FETCH & RENDER PROJECT
@@ -2196,11 +2285,6 @@ function addMsg(text, type){
   el.innerText = text;
   messages.appendChild(el);
   messages.scrollTop = messages.scrollHeight;
-  
-  /* greeting awal */
-  setTimeout(()=>{
-    addMsg("Halo 👋 saya Property Assistant. Mau cari rumah di area mana?", "bot");
-  },1000);
 }
 
 /* ===== SEND ===== */
@@ -2216,27 +2300,33 @@ function sendMessage(){
 
 /* ===== FAKE AI LOGIC ===== */
 function fakeAI(q){
-
+  showTyping();
   setTimeout(()=>{
 
-    let res = "Saya bantu ya 😊";
+    removeTyping();
 
-    if(q.includes("harga")){
-      res = "Budget berapa Kak? Saya carikan yang cocok.";
+    const results = filterProjects(q);
+
+    if(results.length){
+
+      addMsg("Saya temukan beberapa yang cocok 👇","bot");
+
+      results.forEach(p=>{
+        addProjectCard(p);
+      });
+
+      speak("Saya sudah menemukan beberapa rumah yang cocok");
+
+      return;
     }
-    else if(q.includes("dp")){
-      res = "Ada promo tanpa DP + free biaya 🔥";
-    }
-    else if(q.includes("lokasi")){
-      res = "Mau area mana? Bogor / Depok / BSD?";
-    }
-    else{
-      res = "Saya bisa bantu carikan rumah sesuai budget & lokasi.";
-    }
+
+    /* fallback */
+    let res = "Saya bisa bantu carikan rumah sesuai kebutuhan kamu 😊";
 
     addMsg(res,"bot");
+    speak(res);
 
-  },800);
+  },1000);
 }
 
 const voiceBtn = document.getElementById("voiceBtn");
