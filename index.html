@@ -1462,7 +1462,7 @@ gap:20px;
   z-index:9999;
 }
 
-/* WRAP */
+/* ===== WRAP (lebih stabil, no zoom liar) ===== */
 .island-wrap{
   background:#000;
   border-radius:50px;
@@ -1474,13 +1474,20 @@ gap:20px;
   justify-content:center;
 
   transition:
-    width .5s cubic-bezier(.34,1.56,.64,1),
-    height .4s cubic-bezier(.22,.61,.36,1),
-    border-radius .4s;
+    width .45s cubic-bezier(.22,.61,.36,1),
+    height .35s cubic-bezier(.22,.61,.36,1),
+    border-radius .35s;
 
   box-shadow:
-    0 10px 30px rgba(0,0,0,.5),
+    0 10px 30px rgba(0,0,0,.45),
     inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+/* ACTIVE SIZE */
+.island.active .island-wrap{
+  width:320px;
+  height:90px;
+  border-radius:26px;
 }
 
 /* MINI */
@@ -1490,36 +1497,52 @@ gap:20px;
   border-radius:20px;
   background:#111;
   opacity:.7;
-  transition:.3s;
-}
-
-/* CONTENT */
-.island-content{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  opacity:0;
-  transform:scale(.85);
-  transition:.35s ease;
-}
-
-/* ACTIVE */
-.island.active .island-wrap{
-  width:320px;
-  height:84px;
-  border-radius:26px;
+  transition:.25s;
 }
 
 .island.active .island-mini{
   opacity:0;
 }
 
-.island.active .island-content{
-  opacity:1;
-  transform:scale(1);
+/* STACK */
+.island-stack{
+  position:relative;
+  width:100%;
+  height:100%;
 }
 
-/* TEXT */
+/* ITEM */
+.island-item{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  gap:12px;
+
+  padding:0 16px;
+
+  opacity:0;
+  transform:translateY(10px);
+  transition:.35s cubic-bezier(.22,.61,.36,1);
+}
+
+/* ACTIVE ITEM */
+.island-item.show{
+  opacity:1;
+  transform:translateY(0);
+}
+
+/* OLD ITEM (stack bawah) */
+.island-item.prev{
+  opacity:.4;
+  transform:translateY(6px) scale(.96);
+}
+
+/* CONTENT */
+.island-left{
+  font-size:18px;
+}
+
 .island-text{
   display:flex;
   flex-direction:column;
@@ -1530,14 +1553,9 @@ gap:20px;
   font-size:13px;
 }
 
-/* ICON bounce feel */
-.island-left{
-  font-size:20px;
-  transform:scale(.8);
-}
-
-.island.active .island-left{
-  animation:iconPop .5s cubic-bezier(.34,1.56,.64,1);
+.island-action{
+  margin-left:auto;
+  opacity:.6;
 }
 
 @keyframes iconPop{
@@ -1556,16 +1574,8 @@ gap:20px;
 
     <div class="island-mini"></div>
 
-    <div class="island-content">
-      <div class="island-left" id="islandIcon">🔥</div>
-
-      <div class="island-text">
-        <strong id="islandTitle">Promo</strong>
-        <span id="islandDesc">Tanpa DP aktif</span>
-      </div>
-
-      <div class="island-action" id="islandAction">→</div>
-    </div>
+    <!-- STACK CONTAINER -->
+    <div class="island-stack" id="islandStack"></div>
 
   </div>
 </div>
@@ -1906,73 +1916,147 @@ function enableZoom(img){
 }
 
 const island = document.getElementById("dynamicIsland");
+const stack  = document.getElementById("islandStack");
 
-const icon  = document.getElementById("islandIcon");
-const title = document.getElementById("islandTitle");
-const desc  = document.getElementById("islandDesc");
-const action= document.getElementById("islandAction");
+let queue = [];
+let isRunning = false;
 
-let closeTimer;
+/* ===== CREATE ITEM ===== */
+function createItem(data){
+  const el = document.createElement("div");
+  el.className = "island-item";
 
-/* ===== SPRING EFFECT ===== */
-function elasticPop(){
-  island.style.transform = "translateX(-50%) scale(1.08)";
+  el.innerHTML = `
+    <div class="island-left">${data.icon}</div>
+    <div class="island-text">
+      <strong>${data.title}</strong>
+      <span>${data.desc}</span>
+    </div>
+    <div class="island-action">${data.action || ""}</div>
+  `;
 
-  setTimeout(()=>{
-    island.style.transform = "translateX(-50%) scale(0.96)";
-  },120);
-
-  setTimeout(()=>{
-    island.style.transform = "translateX(-50%) scale(1)";
-  },220);
+  return el;
 }
 
-/* ===== MAIN STATE ===== */
-function setIsland(state){
+/* ===== PUSH NOTIFICATION ===== */
+function pushIsland(data){
+  queue.push(data);
+  if(!isRunning) runIsland();
+}
 
-  clearTimeout(closeTimer);
-
-  island.classList.add("active");
-
-  /* elastic trigger */
-  elasticPop();
-
-  switch(state){
-
-    case "promo":
-      icon.textContent = "🔥";
-      title.textContent = "Promo Aktif";
-      desc.textContent = "Tanpa DP + Free Biaya";
-      action.textContent = "→";
-      break;
-
-    case "activity":
-      icon.textContent = "👀";
-      title.textContent = "Sedang Dilihat";
-      desc.textContent = "Unit banyak diminati";
-      action.textContent = "...";
-      break;
-
-    case "chat":
-      icon.textContent = "💬";
-      title.textContent = "Menghubungkan";
-      desc.textContent = "Menuju WhatsApp";
-      action.textContent = "↗";
-      break;
-
-    case "success":
-      icon.textContent = "✅";
-      title.textContent = "Berhasil";
-      desc.textContent = "Tim akan follow up";
-      action.textContent = "✔";
-      break;
+/* ===== RUN LOOP ===== */
+function runIsland(){
+  if(queue.length === 0){
+    isRunning = false;
+    island.classList.remove("active");
+    return;
   }
 
-  /* auto close */
-  closeTimer = setTimeout(()=>{
-    island.classList.remove("active");
-  }, 3200);
+  isRunning = true;
+  island.classList.add("active");
+
+  const data = queue.shift();
+
+  const item = createItem(data);
+  stack.appendChild(item);
+
+  /* previous jadi background */
+  const items = stack.querySelectorAll(".island-item");
+  if(items.length > 1){
+    items[0].classList.remove("show");
+    items[0].classList.add("prev");
+  }
+
+  /* show current */
+  setTimeout(()=>{
+    item.classList.add("show");
+  },50);
+
+  /* remove old */
+  setTimeout(()=>{
+    if(items.length > 1){
+      items[0].remove();
+    }
+  },500);
+
+  /* next */
+  setTimeout(runIsland, 2600);
 }
+
+function islandState(type){
+
+  switch(type){
+
+    case "promo":
+      return {
+        icon:"🔥",
+        title:"Promo Aktif",
+        desc:"Tanpa DP + Free Biaya",
+        action:"→"
+      };
+
+    case "activity":
+      return {
+        icon:"👀",
+        title:"Sedang Dilihat",
+        desc:"Unit ini ramai",
+        action:"..."
+      };
+
+    case "chat":
+      return {
+        icon:"💬",
+        title:"Menghubungkan",
+        desc:"Menuju WhatsApp",
+        action:"↗"
+      };
+
+    case "success":
+      return {
+        icon:"✅",
+        title:"Berhasil",
+        desc:"Tim akan follow up",
+        action:"✔"
+      };
+  }
+}
+
+const fakeNames = [
+  "Andi","Rina","Budi","Dina","Fajar","Sinta","Rizky","Nadia"
+];
+
+const fakeLocations = [
+  "Jakarta","Depok","Bogor","Bekasi","Tangerang"
+];
+
+function randomItem(arr){
+  return arr[Math.floor(Math.random()*arr.length)];
+}
+
+function fakeBuyer(){
+  const name = randomItem(fakeNames);
+  const city = randomItem(fakeLocations);
+
+  pushIsland({
+    icon:"👤",
+    title:`${name} dari ${city}`,
+    desc:"sedang melihat unit ini",
+    action:""
+  });
+}
+
+/* interval random */
+setInterval(()=>{
+  const types = ["promo","activity","buyer"];
+  const pick = randomItem(types);
+
+  if(pick === "buyer"){
+    fakeBuyer();
+  }else{
+    pushIsland(islandState(pick));
+  }
+
+}, 8000);
 
 /* contoh trigger */
 setTimeout(()=>{
@@ -1988,13 +2072,13 @@ setInterval(()=>{
 /* pas klik project */
 document.addEventListener("click",(e)=>{
   if(e.target.closest(".project-card")){
-    setIsland("activity");
+    pushIsland(islandState("activity"));
   }
 });
 
 document.querySelectorAll('a[href*="wa.me"]').forEach(btn=>{
   btn.addEventListener("click",()=>{
-    setIsland("chat");
+    pushIsland(islandState("chat"));
   });
 });
 
@@ -2079,7 +2163,7 @@ function openModal(i){
     </div>
   `;
 
-  setIsland("promo");
+  pushIsland(islandState("promo"));
   initSwipe();
   initCicilan();
 }
