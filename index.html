@@ -2155,14 +2155,26 @@ function filterProjects(text){
   }).slice(0,3); // max 3 biar clean
 }
 
+function getImage(p){
+  if(!p.media || !p.media.length) return "";
+
+  const file = p.media[0];
+
+  return file.startsWith("http")
+    ? file
+    : p.folder + file;
+}
+
 function addProjectCard(p){
 
   const el = document.createElement("div");
   el.className = "msg bot";
 
+  const img = getImage(p);
+
   el.innerHTML = `
     <div class="chat-card">
-      <img src="${p.media?.[0] || ''}">
+      ${img ? `<img src="${img}">` : ""}
       <strong>${p.name}</strong>
       <span>📍 ${p.location}</span><br>
       <span>💰 ${p.price}</span>
@@ -2175,6 +2187,56 @@ function addProjectCard(p){
   el.onclick = ()=>{
     openModal(projects.indexOf(p));
   };
+}
+
+function detectIntent(text){
+
+  text = text.toLowerCase();
+
+  if(text.includes("cicilan") || text.includes("kpr")){
+    return "finance";
+  }
+
+  if(text.includes("survey") || text.includes("lihat lokasi")){
+    return "visit";
+  }
+
+  if(text.includes("minat") || text.includes("mau") || text.includes("ambil")){
+    return "hot";
+  }
+
+  if(text.includes("wa") || text.includes("nomor")){
+    return "closing";
+  }
+
+  return "normal";
+}
+
+function showCTA(){
+
+  const el = document.createElement("div");
+  el.className = "msg bot";
+
+  el.innerHTML = `
+    <a href="https://wa.me/6281802168184?text=Halo saya tertarik dengan rumahnya"
+       target="_blank"
+       style="
+         display:block;
+         text-align:center;
+         padding:12px;
+         border-radius:20px;
+         background:#25d366;
+         color:#000;
+         font-weight:600;
+         text-decoration:none;
+         margin-top:6px;
+       ">
+       Lanjut ke WhatsApp 📲
+    </a>
+  `;
+
+  messages.appendChild(el);
+  messages.scrollTop = messages.scrollHeight;
 }
 
 /* =========================
@@ -2300,29 +2362,87 @@ function sendMessage(){
 
 /* ===== FAKE AI LOGIC ===== */
 function fakeAI(q){
+
   showTyping();
+
   setTimeout(()=>{
 
     removeTyping();
 
+    const intent  = detectIntent(q);
     const results = filterProjects(q);
 
-    if(results.length){
+    /* =========================
+       HOT LEAD RESPONSE
+    ========================= */
 
-      addMsg("Saya temukan beberapa yang cocok 👇","bot");
+    if(intent === "hot"){
+      addMsg("🔥 Wah cocok nih, unitnya lagi tersedia!", "bot");
 
-      results.forEach(p=>{
-        addProjectCard(p);
-      });
+      if(results.length){
+        results.forEach(addProjectCard);
+      }
 
-      speak("Saya sudah menemukan beberapa rumah yang cocok");
+      addMsg("Mau saya bantu amankan unit atau langsung hubungkan ke admin?", "bot");
+
+      speak("Unit ini masih tersedia, saya bisa bantu lanjutkan ke admin");
+
+      showCTA();
 
       return;
     }
 
-    /* fallback */
-    let res = "Saya bisa bantu carikan rumah sesuai kebutuhan kamu 😊";
+    /* =========================
+       CICILAN / FINANCE
+    ========================= */
 
+    if(intent === "finance"){
+      addMsg("Saya bantu hitung cicilan ya 😊", "bot");
+
+      if(results.length){
+        addProjectCard(results[0]);
+      }
+
+      addMsg("Mau saya hitungkan simulasi cicilan lengkap?", "bot");
+
+      speak("Saya bisa bantu hitung cicilan untuk kamu");
+
+      return;
+    }
+
+    /* =========================
+       SURVEY INTENT
+    ========================= */
+
+    if(intent === "visit"){
+      addMsg("Kita bisa jadwalkan survey langsung ke lokasi 👍", "bot");
+
+      if(results.length){
+        results.forEach(addProjectCard);
+      }
+
+      addMsg("Kapan rencana mau datang? Saya bantu atur jadwalnya.", "bot");
+
+      speak("Kita bisa jadwalkan survey ke lokasi");
+
+      showCTA();
+
+      return;
+    }
+
+    /* =========================
+       NORMAL FLOW
+    ========================= */
+
+    if(results.length){
+      addMsg("Saya temukan beberapa yang cocok 👇","bot");
+      results.forEach(addProjectCard);
+      speak("Saya menemukan beberapa rumah yang cocok");
+      return;
+    }
+
+    /* fallback */
+    const res = "Saya bisa bantu carikan rumah sesuai kebutuhan kamu 😊";
     addMsg(res,"bot");
     speak(res);
 
@@ -2518,6 +2638,11 @@ document.addEventListener("scroll",()=>{
 function openModal(i){
   const p = projects[i];
   currentProject = p;
+  
+  const aiPanel = document.getElementById("aiPanel");
+  if(aiPanel){
+    aiPanel.classList.remove("active");
+  }
 
   document.body.classList.add("modal-open");
   document.getElementById("modal").classList.add("active");
