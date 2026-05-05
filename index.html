@@ -1676,6 +1676,32 @@ gap:20px;
   color:white;
 }
 
+.typing{
+  display:flex;
+  gap:6px;
+  padding:10px 14px;
+  border-radius:18px;
+  background:rgba(255,255,255,.1);
+  width:fit-content;
+}
+
+.typing span{
+  width:6px;
+  height:6px;
+  background:white;
+  border-radius:50%;
+  opacity:.4;
+  animation:blink 1.4s infinite;
+}
+
+.typing span:nth-child(2){animation-delay:.2s}
+.typing span:nth-child(3){animation-delay:.4s}
+
+@keyframes blink{
+  0%,80%,100%{opacity:.2}
+  40%{opacity:1}
+}
+
 </style>
 </head>
 
@@ -1962,6 +1988,105 @@ let fsIndex = 0;
 let fsItems = [];
 let dotsTimer = null;
 
+function findProjectByKeyword(query){
+  query = query.toLowerCase();
+
+  return projects.find(p =>
+    p.name.toLowerCase().includes(query) ||
+    p.location.toLowerCase().includes(query)
+  );
+}
+
+function formatRupiah(num){
+  return "Rp " + num.toLocaleString("id-ID");
+}
+
+function showTyping(){
+  const el = document.createElement("div");
+  el.className = "typing bot";
+  el.id = "typingIndicator";
+
+  el.innerHTML = "<span></span><span></span><span></span>";
+
+  messages.appendChild(el);
+  messages.scrollTop = messages.scrollHeight;
+}
+
+function removeTyping(){
+  const el = document.getElementById("typingIndicator");
+  if(el) el.remove();
+}
+
+/* ===== AI ENGINE ===== */
+function fakeAI(q){
+
+  showTyping();
+
+  setTimeout(()=>{
+
+    removeTyping();
+
+    let res = "Saya bantu ya 😊";
+
+    const project = findProjectByKeyword(q);
+
+    /* ===== DETECT INTENT ===== */
+
+    if(project){
+      res =
+`Saya rekomendasikan:
+
+🏡 ${project.name}
+📍 ${project.location}
+💰 ${project.price}
+
+Mau saya bantu hitung cicilan atau jadwalkan survey?`;
+    }
+
+    else if(q.includes("harga")){
+      const random = projects[Math.floor(Math.random()*projects.length)];
+
+      res =
+`Contoh unit:
+
+🏡 ${random.name}
+📍 ${random.location}
+💰 ${random.price}
+
+Budget kamu berapa? saya carikan yang paling cocok 🔥`;
+    }
+
+    else if(q.includes("dp")){
+      res = "Sekarang ada promo TANPA DP + free semua biaya 🔥";
+    }
+
+    else if(q.includes("lokasi")){
+      const areas = [...new Set(projects.map(p=>p.location))];
+      res = "Area tersedia: \n" + areas.join(", ");
+    }
+
+    else{
+      res = "Saya bisa bantu carikan rumah sesuai budget & lokasi kamu 😊";
+    }
+
+    addMsg(res,"bot");
+
+    speak(res); // 🔊 voice reply
+
+  },1000);
+}
+
+// function speak(text){
+  //const utter = new SpeechSynthesisUtterance(text);
+
+  //utter.lang = "id-ID";
+  //utter.rate = 1;
+  //utter.pitch = 1;
+
+  //speechSynthesis.cancel(); // stop sebelumnya
+  //speechSynthesis.speak(utter);
+//}
+
 
 /* =========================
    FETCH & RENDER PROJECT
@@ -2071,6 +2196,11 @@ function addMsg(text, type){
   el.innerText = text;
   messages.appendChild(el);
   messages.scrollTop = messages.scrollHeight;
+  
+  /* greeting awal */
+  setTimeout(()=>{
+    addMsg("Halo 👋 saya Property Assistant. Mau cari rumah di area mana?", "bot");
+  },1000);
 }
 
 /* ===== SEND ===== */
@@ -2124,8 +2254,8 @@ if('webkitSpeechRecognition' in window){
 
   recognition.onresult = (e)=>{
     const text = e.results[0][0].transcript;
-    input.value = text;
-    sendMessage();
+    addMsg(text,"user");
+    fakeAI(text);
     voiceBtn.innerText = "🎤";
   };
 
