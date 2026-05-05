@@ -3072,44 +3072,15 @@ document.querySelector(".media-sheet").addEventListener("click",e=>{
 /* =========================
    MODAL CLOSE & SWIPE
    ========================= */
-//function closeModal(){
-  ///const sheet = document.querySelector(".sheet");
-  //sheet.style.transform = "translate(-50%,100%)";
-
-  ///setTimeout(()=>{
-    //document.getElementById("modal").classList.remove("active");
-    //document.body.classList.remove("modal-open");
-    //sheet.style.transform = "";
-  //},350);
-//}
-
 function closeModal(){
-
-  const modal = document.getElementById("modal");
-  const chat  = document.getElementById("aiPanel");
-  const input = document.getElementById("aiInput");
-
-  modal.classList.remove("show");
+  const sheet = document.querySelector(".sheet");
+  sheet.style.transform = "translate(-50%,100%)";
 
   setTimeout(()=>{
-
-    /* balik ke chat */
-    chat.classList.add("show");
-    chat.classList.add("return");
-
-    /* focus tanpa zoom glitch */
-    input.focus();
-    input.blur();
-    setTimeout(()=> input.focus(), 50);
-
-    /* island sync */
-    islandSync("chat_open");
-
-  },200);
-
-  setTimeout(()=>{
-    chat.classList.remove("return");
-  },400);
+    document.getElementById("modal").classList.remove("active");
+    document.body.classList.remove("modal-open");
+    sheet.style.transform = "";
+  },350);
 }
 
 function initSwipe(){
