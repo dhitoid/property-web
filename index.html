@@ -1452,7 +1452,8 @@ gap:20px;
   opacity:.8;
 }
 
-/* ================= MULTI STATE ISLAND ================= */
+/* ===== ULTRA IOS ISLAND ===== */
+
 .island{
   position:fixed;
   top:14px;
@@ -1461,59 +1462,64 @@ gap:20px;
   z-index:9999;
 }
 
-/* INNER */
-.island-inner{
+/* WRAP */
+.island-wrap{
   background:#000;
   border-radius:50px;
-  padding:6px 14px;
+  height:36px;
+  width:120px;
+
   display:flex;
   align-items:center;
   justify-content:center;
-  transition:all .5s cubic-bezier(.22,.61,.36,1);
-  box-shadow:0 10px 30px rgba(0,0,0,.4);
+
+  transition:
+    width .5s cubic-bezier(.34,1.56,.64,1),
+    height .4s cubic-bezier(.22,.61,.36,1),
+    border-radius .4s;
+
+  box-shadow:
+    0 10px 30px rgba(0,0,0,.5),
+    inset 0 1px 0 rgba(255,255,255,.08);
 }
 
 /* MINI */
 .island-mini{
   width:60px;
-  height:18px;
+  height:16px;
   border-radius:20px;
   background:#111;
   opacity:.7;
+  transition:.3s;
 }
 
-/* EXPANDED */
-.island-expanded{
+/* CONTENT */
+.island-content{
   display:flex;
   align-items:center;
   gap:12px;
   opacity:0;
-  transform:scale(.9);
-  pointer-events:none;
-  transition:.4s;
+  transform:scale(.85);
+  transition:.35s ease;
 }
 
-/* STATE ACTIVE */
-.island.active .island-inner{
-  padding:12px 18px;
+/* ACTIVE */
+.island.active .island-wrap{
+  width:320px;
+  height:84px;
   border-radius:26px;
 }
 
-.island.active .island-expanded{
+.island.active .island-mini{
+  opacity:0;
+}
+
+.island.active .island-content{
   opacity:1;
   transform:scale(1);
-  pointer-events:auto;
 }
 
-.island.active .island-mini{
-  display:none;
-}
-
-/* CONTENT */
-.island-left{
-  font-size:20px;
-}
-
+/* TEXT */
 .island-text{
   display:flex;
   flex-direction:column;
@@ -1524,10 +1530,20 @@ gap:20px;
   font-size:13px;
 }
 
-.island-action{
-  margin-left:10px;
-  font-size:16px;
-  opacity:.7;
+/* ICON bounce feel */
+.island-left{
+  font-size:20px;
+  transform:scale(.8);
+}
+
+.island.active .island-left{
+  animation:iconPop .5s cubic-bezier(.34,1.56,.64,1);
+}
+
+@keyframes iconPop{
+  0%{transform:scale(.6)}
+  60%{transform:scale(1.2)}
+  100%{transform:scale(1)}
 }
 
 </style>
@@ -1536,27 +1552,19 @@ gap:20px;
 <body>
   
 <div id="dynamicIsland" class="island">
-  <div class="island-inner">
+  <div class="island-wrap">
 
-    <div class="island-mini" id="islandMini">
-      ●
-    </div>
+    <div class="island-mini"></div>
 
-    <div class="island-expanded" id="islandExpanded">
-
-      <div class="island-left">
-        <span id="islandIcon">🔥</span>
-      </div>
+    <div class="island-content">
+      <div class="island-left" id="islandIcon">🔥</div>
 
       <div class="island-text">
         <strong id="islandTitle">Promo</strong>
         <span id="islandDesc">Tanpa DP aktif</span>
       </div>
 
-      <div class="island-action" id="islandAction">
-        →
-      </div>
-
+      <div class="island-action" id="islandAction">→</div>
     </div>
 
   </div>
@@ -1899,56 +1907,69 @@ function enableZoom(img){
 
 const island = document.getElementById("dynamicIsland");
 
-const islandIcon  = document.getElementById("islandIcon");
-const islandTitle = document.getElementById("islandTitle");
-const islandDesc  = document.getElementById("islandDesc");
-const islandAction= document.getElementById("islandAction");
+const icon  = document.getElementById("islandIcon");
+const title = document.getElementById("islandTitle");
+const desc  = document.getElementById("islandDesc");
+const action= document.getElementById("islandAction");
 
-let islandTimer = null;
+let closeTimer;
 
-/* ===== CORE FUNCTION ===== */
+/* ===== SPRING EFFECT ===== */
+function elasticPop(){
+  island.style.transform = "translateX(-50%) scale(1.08)";
+
+  setTimeout(()=>{
+    island.style.transform = "translateX(-50%) scale(0.96)";
+  },120);
+
+  setTimeout(()=>{
+    island.style.transform = "translateX(-50%) scale(1)";
+  },220);
+}
+
+/* ===== MAIN STATE ===== */
 function setIsland(state){
 
-  clearTimeout(islandTimer);
+  clearTimeout(closeTimer);
 
   island.classList.add("active");
+
+  /* elastic trigger */
+  elasticPop();
 
   switch(state){
 
     case "promo":
-      islandIcon.textContent = "🔥";
-      islandTitle.textContent = "Promo Aktif";
-      islandDesc.textContent = "Tanpa DP + Free Biaya";
-      islandAction.textContent = "→";
+      icon.textContent = "🔥";
+      title.textContent = "Promo Aktif";
+      desc.textContent = "Tanpa DP + Free Biaya";
+      action.textContent = "→";
       break;
 
     case "activity":
-      islandIcon.textContent = "👀";
-      islandTitle.textContent = "Sedang Dilihat";
-      islandDesc.textContent = "Banyak diminati";
-      islandAction.textContent = "...";
+      icon.textContent = "👀";
+      title.textContent = "Sedang Dilihat";
+      desc.textContent = "Unit banyak diminati";
+      action.textContent = "...";
       break;
 
     case "chat":
-      islandIcon.textContent = "💬";
-      islandTitle.textContent = "Terhubung";
-      islandDesc.textContent = "Menuju WhatsApp";
-      islandAction.textContent = "↗";
+      icon.textContent = "💬";
+      title.textContent = "Menghubungkan";
+      desc.textContent = "Menuju WhatsApp";
+      action.textContent = "↗";
       break;
 
     case "success":
-      islandIcon.textContent = "✅";
-      islandTitle.textContent = "Berhasil";
-      islandDesc.textContent = "Tim akan follow up";
-      islandAction.textContent = "✔";
+      icon.textContent = "✅";
+      title.textContent = "Berhasil";
+      desc.textContent = "Tim akan follow up";
+      action.textContent = "✔";
       break;
-
-    default:
-      return;
   }
 
   /* auto close */
-  islandTimer = setTimeout(()=>{
+  closeTimer = setTimeout(()=>{
     island.classList.remove("active");
   }, 3200);
 }
@@ -1962,7 +1983,7 @@ setInterval(()=>{
   const states = ["promo","activity"];
   const random = states[Math.floor(Math.random()*states.length)];
   setIsland(random);
-}, 10000);
+}, 12000);
 
 /* pas klik project */
 document.addEventListener("click",(e)=>{
