@@ -2082,15 +2082,7 @@ gap:20px;
     </div>
 
     <!-- FILTER CHIP SCROLL -->
-    <div class="filter-scroll">
-      <button class="filter-chip active" data-filter="all">Semua</button>
-      <button class="filter-chip" data-filter="Grand Pakis Residence">Grand Pakis Residence</button>
-      <button class="filter-chip" data-filter="Grand Duta Pakis">Grand Duta Pakis</button>
-      <button class="filter-chip" data-filter="Nara Pakis Residence">Nara Pakis Residence</button>
-      <button class="filter-chip" data-filter="Cluster Gardenia">Cluster Gardenia</button>
-      <button class="filter-chip" data-filter="Cluster Lily">Cluster Lily</button>
-      <button class="filter-chip" data-filter="Ruko 2 Lantai">Ruko 2 Lantai</button>
-    </div>
+<div class="filter-scroll" id="filterContainer"></div>
 
   </div>
 
@@ -2582,28 +2574,6 @@ function speak(text){
   speechSynthesis.speak(utter);
 }
 
-function generateFilters(){
-  const container = document.querySelector(".project-filter");
-
-  // ambil unique project name
-  const names = [...new Set(projects.map(p => p.name))];
-
-  container.innerHTML = `
-    <button class="filter-btn active" data-filter="all">Semua</button>
-  `;
-
-  names.forEach(name=>{
-    const btn = document.createElement("button");
-    btn.className = "filter-btn";
-    btn.dataset.filter = name;
-    btn.innerText = name;
-
-    container.appendChild(btn);
-  });
-
-  initFilterEvent(); // 🔥 re-bind event
-}
-
 function extractBudget(text){
   const match = text.match(/(\d+)\s?(jt|juta|m)/i);
   if(!match) return null;
@@ -2877,28 +2847,24 @@ fetch("projects.json")
   .then(r => r.json())
   .then(d => {
     projects = d;
-    generateFilters(); // 🔥 auto button
-    renderProjects(); // 🔥 tampil awal
+    renderProjects();
+    generateFilters(); // 🔥 TAMBAH INI
     generateSchema();
   });
 
-function renderProjects(type="all", keyword=""){
+function renderProjects(filter="all"){
   const grid = document.getElementById("projectGrid");
   grid.innerHTML = "";
 
-  const filtered = projects.filter(p=>{
-    const matchFilter =
-      type === "all" ||
-      p.name.toLowerCase() === type.toLowerCase();
-
-    const matchSearch =
-      p.name.toLowerCase().includes(keyword) ||
-      p.location.toLowerCase().includes(keyword);
-
-    return matchFilter && matchSearch;
-  });
+  const filtered =
+    filter === "all"
+      ? projects
+      : projects.filter(p =>
+          p.name.toLowerCase() === filter.toLowerCase()
+        );
 
   filtered.forEach((p,i)=>{
+
     const cover = p.media?.[0]
       ? (p.media[0].startsWith("http")
           ? p.media[0]
@@ -2912,7 +2878,15 @@ function renderProjects(type="all", keyword=""){
       <div class="project-cover"
            style="background-image:url('${cover}')"></div>
 
-      ${p.badge ? `<div class="card-badge">${p.badge.text}</div>` : ""}
+      <div class="project-overlay"></div>
+
+      ${p.badge ? `
+        <div class="card-badge">${p.badge.text}</div>
+      ` : ""}
+
+      <div class="card-status">
+        ${p.status || "ready"}
+      </div>
 
       <div class="card-content">
         <div class="card-location">📍 ${p.location}</div>
@@ -2930,32 +2904,6 @@ function renderProjects(type="all", keyword=""){
 function applyProjectFilter(type){
   renderProjects(type);
 }
-
-let activeFilter = "all";
-
-function initFilterEvent(){
-  const filterButtons = document.querySelectorAll(".filter-btn");
-
-  filterButtons.forEach(btn=>{
-    btn.onclick = ()=>{
-      filterButtons.forEach(b=>b.classList.remove("active"));
-      btn.classList.add("active");
-
-      activeFilter = btn.dataset.filter;
-
-      const keyword = document.getElementById("searchInput").value.toLowerCase();
-
-      renderProjects(activeFilter, keyword);
-    };
-  });
-}
-
-document.addEventListener("input", e=>{
-  if(e.target.id === "searchInput"){
-    const keyword = e.target.value.toLowerCase();
-    renderProjects(activeFilter, keyword);
-  }
-});
 
 /* =========================
    UTILITIES
@@ -3327,6 +3275,64 @@ function applyCombinedFilter(){
   });
 
   renderFilteredProjects(result);
+}
+
+function generateFilters(){
+  const container = document.getElementById("filterContainer");
+
+  // 🔥 ambil semua kategori unik
+  const categories = new Set();
+
+  projects.forEach(p=>{
+    if(p.name) categories.add(p.name);
+    if(p.type) categories.add(p.type);
+    if(p.location) categories.add(p.location);
+  });
+
+  // reset
+  container.innerHTML = "";
+
+  // 🔥 tombol SEMUA
+  const allBtn = document.createElement("button");
+  allBtn.className = "filter-chip active";
+  allBtn.dataset.filter = "all";
+  allBtn.innerText = "Semua";
+  container.appendChild(allBtn);
+
+  // 🔥 generate dari data
+  categories.forEach(cat=>{
+    const btn = document.createElement("button");
+    btn.className = "filter-chip";
+    btn.dataset.filter = cat.toLowerCase();
+    btn.innerText = cat;
+
+    container.appendChild(btn);
+  });
+
+  // 🔥 re-bind event (PENTING)
+  bindFilterEvents();
+}
+
+function bindFilterEvents(){
+  document.querySelectorAll(".filter-chip")
+  .forEach(btn=>{
+    btn.addEventListener("click",()=>{
+
+      document.querySelectorAll(".filter-chip")
+        .forEach(b=>b.classList.remove("active"));
+
+      btn.classList.add("active");
+
+      activeFilter = btn.dataset.filter.toLowerCase();
+
+      btn.scrollIntoView({
+        behavior:"smooth",
+        inline:"center"
+      });
+
+      applyCombinedFilter();
+    });
+  });
 }
 
 /* =========================
