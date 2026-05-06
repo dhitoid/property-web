@@ -2175,6 +2175,106 @@ function removeTyping(){
   if(el) el.remove();
 }
 
+function smartReply(intent, results, query){
+
+  const p = results?.[0];
+
+  switch(intent){
+
+    case "location":
+      return {
+        text:`Lokasinya strategis dekat ${p?.location || "area utama"} 👍 Akses gampang ke BSD & Puspitek.`,
+        showCard:true
+      };
+
+    case "price":
+      return {
+        text:`Harga mulai ${p?.price || "500 jutaan"} 💰 Masih ada promo tanpa DP & free biaya.`,
+        showCard:true
+      };
+
+    case "cicilan":
+      return {
+        text:`Cicilan ringan mulai ±3 jutaan/bulan 😍 Mau saya hitungkan simulasi sesuai budget kamu?`,
+        showCard:true
+      };
+
+    case "visit":
+      return {
+        text:`Boleh banget 👍 Weekend ini masih ada slot survey.`,
+        cta:true
+      };
+
+    case "availability":
+      return {
+        text:`Unit masih tersedia, tapi lagi banyak yang tanya 👀`,
+        urgency:true
+      };
+
+    default:
+      return {
+        text:`Saya bantu carikan yang paling cocok ya 😊 Lagi fokus di area mana atau budget berapa?`
+      };
+  }
+}
+
+let lastAIMessageTime = 0;
+
+function safeAddAI(text){
+
+  const now = Date.now();
+
+  // ⛔ minimal 8 detik antar AI message
+  if(now - lastAIMessageTime < 8000) return;
+
+  lastAIMessageTime = now;
+
+  addMsg(text, "bot");
+}
+
+function smartFollowUp(){
+
+  const idle = Date.now() - userActivity.lastTime;
+
+  // ❌ kalau user baru aktif → jangan ganggu
+  if(idle < 15000) return;
+
+  // 🔹 Level 1 (soft)
+  if(idle > 20000 && userActivity.interestLevel < 2){
+    safeAddAI("Masih cari-cari atau mau saya bantu pilihkan yang paling cocok? 😊");
+  }
+
+  // 🔹 Level 2 (mid)
+  else if(idle > 40000 && userActivity.lastProject){
+    safeAddAI(
+      `Unit ${userActivity.lastProject.name} ini banyak diminati loh 👀`
+    );
+  }
+
+  // 🔹 Level 3 (closing)
+  else if(idle > 70000 && userActivity.interestLevel > 2){
+    safeAddAI(
+      "Kalau mau, saya bisa bantu amankan unit dulu sebelum keambil 🙌"
+    );
+
+    showCTA();
+  }
+}
+
+function triggerSoftUrgency(){
+
+  const now = Date.now();
+
+  if(now - userActivity.lastTime < 10000) return; // user lagi aktif
+
+  if(!userActivity.lastProject) return;
+
+  // 50% chance aja (biar natural)
+  if(Math.random() > 0.5) return;
+
+  smartBuyerNotif();
+}
+
 /* =========================
    AI ENGINE (UPGRADED)
    ========================= */
@@ -2185,11 +2285,30 @@ function fakeAI(q){
 
   setTimeout(()=>{
 
-    removeTyping();
+  removeTyping();
 
-    const intent  = detectIntent(q);
-    const results = filterProjects(q);
-
+  const intent  = detectIntent(q);
+  const results = filterProjects(q);
+  
+  const reply = smartReply(intent, results, q);
+  
+  addMsg(reply.text, "bot");
+  
+  // show card kalau relevan
+  if(reply.showCard && results.length){
+    addProjectCard(results[0]);
+  }
+  
+  // CTA hanya kalau intent kuat
+  if(reply.cta){
+    showCTA();
+  }
+  
+  // urgency hanya kalau user sudah engage
+  if(reply.urgency && userActivity.interestLevel > 2){
+    triggerSoftUrgency();
+  }
+  
     /* ================= HOT LEAD ================= */
     if(intent === "hot"){
       addMsg("🔥 Wah ini cocok banget buat kamu!", "bot");
@@ -2407,37 +2526,16 @@ function addProjectCard(p){
 }
 
 function detectIntent(text){
-
   text = text.toLowerCase();
 
-  if(
-    text.includes("minat") ||
-    text.includes("ambil") ||
-    text.includes("booking") ||
-    text.includes("ready") ||
-    text.includes("tersedia")
-  ){
-    return "hot";
-  }
+  if(/(lokasi|dimana|area|dekat)/.test(text)) return "location";
+  if(/(harga|berapa|price|jt|juta|m)/.test(text)) return "price";
+  if(/(cicilan|kpr|angsuran)/.test(text)) return "cicilan";
+  if(/(survey|lihat|kunjungi)/.test(text)) return "visit";
+  if(/(promo|diskon|bonus)/.test(text)) return "promo";
+  if(/(tersedia|ready|masih ada)/.test(text)) return "availability";
 
-  if(
-    text.includes("cicilan") ||
-    text.includes("kpr") ||
-    text.includes("dp") ||
-    text.includes("angsuran")
-  ){
-    return "finance";
-  }
-
-  if(
-    text.includes("survey") ||
-    text.includes("lihat lokasi") ||
-    text.includes("kunjungan")
-  ){
-    return "visit";
-  }
-
-  return "browse";
+  return "general";
 }
 
 function getAIReply(intent){
