@@ -2141,9 +2141,10 @@ function pushIsland(data){
 
 function islandState(type){
   return {
-    icon:"✨",
-    title:"Info",
-    desc:type
+    icon:"🔥",
+    title:"Promo",
+    desc:"Unit tersedia",
+    action:"→"
   };
 }
 
@@ -2500,11 +2501,6 @@ function openAI(){
   islandSync("chat_open");
 }
 
-card.addEventListener("click", ()=>{
-  openModal(data);
-  islandSync("modal");
-});
-
 /* =========================
    FETCH & RENDER PROJECT
    ========================= */
@@ -2635,18 +2631,18 @@ function addMsg(text, type, options = {}){
 
 /* ===== SEND ===== */
 function sendMessage(){
-
-  const inputEl = document.getElementById("chatInput");
-  const text = inputEl.value;
+  const input = document.getElementById("aiInput"); // ✅ FIX
+  const text = input.value.trim();
 
   if(!text) return;
 
   addMsg(text, "user");
+
   islandSync("typing");
 
-  fakeAI(text); // 🔥 langsung pakai ini aja
+  fakeAI(text); // 🔥 langsung pakai ini aja (hapus logic double)
 
-  inputEl.value = "";
+  input.value = "";
 }
 
 const voiceBtn = document.getElementById("voiceBtn");
@@ -2795,12 +2791,6 @@ document.addEventListener("click",(e)=>{
   if(e.target.closest(".project-card")){
     showIsland("activity");
   }
-});
-
-document.querySelectorAll('a[href*="wa.me"]').forEach(btn=>{
-  btn.addEventListener("click",()=>{
-    showIsland("chat");
-  });
 });
 
 document.querySelectorAll('a[href*="wa.me"]').forEach(btn=>{
