@@ -2582,6 +2582,28 @@ function speak(text){
   speechSynthesis.speak(utter);
 }
 
+function generateFilters(){
+  const container = document.querySelector(".project-filter");
+
+  // ambil unique project name
+  const names = [...new Set(projects.map(p => p.name))];
+
+  container.innerHTML = `
+    <button class="filter-btn active" data-filter="all">Semua</button>
+  `;
+
+  names.forEach(name=>{
+    const btn = document.createElement("button");
+    btn.className = "filter-btn";
+    btn.dataset.filter = name;
+    btn.innerText = name;
+
+    container.appendChild(btn);
+  });
+
+  initFilterEvent(); // 🔥 re-bind event
+}
+
 function extractBudget(text){
   const match = text.match(/(\d+)\s?(jt|juta|m)/i);
   if(!match) return null;
@@ -2855,23 +2877,28 @@ fetch("projects.json")
   .then(r => r.json())
   .then(d => {
     projects = d;
-    renderProjects();
+    generateFilters(); // 🔥 auto button
+    renderProjects(); // 🔥 tampil awal
     generateSchema();
   });
 
-function renderProjects(filter="all"){
+function renderProjects(type="all", keyword=""){
   const grid = document.getElementById("projectGrid");
   grid.innerHTML = "";
 
-  const filtered =
-    filter === "all"
-      ? projects
-      : projects.filter(p =>
-          p.name.toLowerCase() === filter.toLowerCase()
-        );
+  const filtered = projects.filter(p=>{
+    const matchFilter =
+      type === "all" ||
+      p.name.toLowerCase() === type.toLowerCase();
+
+    const matchSearch =
+      p.name.toLowerCase().includes(keyword) ||
+      p.location.toLowerCase().includes(keyword);
+
+    return matchFilter && matchSearch;
+  });
 
   filtered.forEach((p,i)=>{
-
     const cover = p.media?.[0]
       ? (p.media[0].startsWith("http")
           ? p.media[0]
@@ -2885,15 +2912,7 @@ function renderProjects(filter="all"){
       <div class="project-cover"
            style="background-image:url('${cover}')"></div>
 
-      <div class="project-overlay"></div>
-
-      ${p.badge ? `
-        <div class="card-badge">${p.badge.text}</div>
-      ` : ""}
-
-      <div class="card-status">
-        ${p.status || "ready"}
-      </div>
+      ${p.badge ? `<div class="card-badge">${p.badge.text}</div>` : ""}
 
       <div class="card-content">
         <div class="card-location">📍 ${p.location}</div>
@@ -2911,6 +2930,32 @@ function renderProjects(filter="all"){
 function applyProjectFilter(type){
   renderProjects(type);
 }
+
+let activeFilter = "all";
+
+function initFilterEvent(){
+  const filterButtons = document.querySelectorAll(".filter-btn");
+
+  filterButtons.forEach(btn=>{
+    btn.onclick = ()=>{
+      filterButtons.forEach(b=>b.classList.remove("active"));
+      btn.classList.add("active");
+
+      activeFilter = btn.dataset.filter;
+
+      const keyword = document.getElementById("searchInput").value.toLowerCase();
+
+      renderProjects(activeFilter, keyword);
+    };
+  });
+}
+
+document.addEventListener("input", e=>{
+  if(e.target.id === "searchInput"){
+    const keyword = e.target.value.toLowerCase();
+    renderProjects(activeFilter, keyword);
+  }
+});
 
 /* =========================
    UTILITIES
