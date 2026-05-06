@@ -9,7 +9,7 @@
     "status": "ready",
     
     "badge": {
-    "type": "promo",
+    "type": "Grand Pakis Residence",
     "text": "DP 0% | Full Furnished | 3Jt All In"
     },
     
@@ -50,11 +50,48 @@
     "status": "ready",
     
     "badge": {
-    "type": "promo",
+    "type": "Grand Duta Pakis",
     "text": "PROMO DP 0%"
     }, 
     
     "description": "Grand Duta Pakis menghadirkan hunian minimalis modern dengan lingkungan tenang dan sistem keamanan one gate. Proses KPR mudah dan legalitas aman.",
+
+    "folder": "assets/gdp/",
+    "media": [
+      "brosur.JPEG",
+      "spekgpr.JPEG",
+      "gpr1.WEBP",
+      "gpr2.WEBP",
+      "gpr3.WEBP",
+      "gpr4.WEBP",
+      "https://res.cloudinary.com/dvpoxkbcl/video/upload/v1769347142/30dce1f2-6b39-4cab-9df5-bba98d69c985_hynizi.mp4",
+      "https://res.cloudinary.com/dvpoxkbcl/video/upload/v1769347140/e51e72be-1e69-416c-9c08-6e7a9f1a8e9e_zchdpm.mp4"
+    ],
+
+    "nearby": [
+      "10 menit ke RS Hermina",
+      "15 menit ke Taman Tekno",
+      "Dekat Jalan Raya Provinsi",
+      "Akses cepat ke Pamulang & BSD"
+    ],
+
+    "mapLink": "https://maps.app.goo.gl/XGgBGL5jwyQbXDG46?g_st=ic"
+  },
+  {
+    "name": "Nara Pakis Residence",
+    "location": "Pamulang",
+
+    "price": "Mulai 2 Jutaan",
+    "priceValue": 490000000,
+    "type": "Cluster Premium",
+    "status": "ready",
+    
+    "badge": {
+    "type": "Nara Pakis Residence",
+    "text": "PROMO DP 0%"
+    }, 
+    
+    "description": "Nara Pakis Residence menghadirkan hunian minimalis modern dengan lingkungan tenang dan sistem keamanan one gate. Proses KPR mudah dan legalitas aman.",
 
     "folder": "assets/gdp/",
     "media": [
