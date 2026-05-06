@@ -2125,6 +2125,36 @@ let userActivity = {
   interestLevel: 0
 };
 
+let userFunnel = {
+  step: "cold", // cold → explore → compare → hot → closing
+};
+
+function updateFunnel(intent){
+
+  switch(intent){
+
+    case "location":
+      userFunnel.step = "explore";
+      break;
+
+    case "price":
+    case "cicilan":
+      userFunnel.step = "compare";
+      break;
+
+    case "visit":
+      userFunnel.step = "hot";
+      break;
+
+    case "availability":
+      if(userFunnel.step === "hot"){
+        userFunnel.step = "closing";
+      }
+      break;
+  }
+
+}
+
 function findProjectByKeyword(query){
   query = query.toLowerCase();
 
@@ -2175,7 +2205,7 @@ function removeTyping(){
   if(el) el.remove();
 }
 
-function smartReply(intent, results, query){
+function smartReply(intent, results){
 
   const p = results?.[0];
 
@@ -2183,37 +2213,49 @@ function smartReply(intent, results, query){
 
     case "location":
       return {
-        text:`Lokasinya strategis dekat ${p?.location || "area utama"} 👍 Akses gampang ke BSD & Puspitek.`,
+        text:`Ada di ${p?.location || "area strategis"} 👍 Dekat akses BSD & Puspitek.
+
+Kamu cari yang lebih ke akses kerja atau lingkungan nyaman?`,
         showCard:true
       };
 
     case "price":
       return {
-        text:`Harga mulai ${p?.price || "500 jutaan"} 💰 Masih ada promo tanpa DP & free biaya.`,
+        text:`Range harga mulai ${p?.price || "500 jutaan"} 💰
+
+Kalau budget kamu di berapa? Biar aku filterin yang paling pas 👌`,
         showCard:true
       };
 
     case "cicilan":
       return {
-        text:`Cicilan ringan mulai ±3 jutaan/bulan 😍 Mau saya hitungkan simulasi sesuai budget kamu?`,
+        text:`Cicilan mulai ±3 jutaan/bulan 😍
+
+Kalau aku bantu hitungin sesuai kondisi kamu, mau DP berapa kira-kira?`,
         showCard:true
       };
 
     case "visit":
       return {
-        text:`Boleh banget 👍 Weekend ini masih ada slot survey.`,
+        text:`Boleh banget 👍
+
+Biasanya yang sudah lihat langsung lebih yakin.
+
+Mau aku bantu booking slot weekend ini?`,
         cta:true
       };
 
     case "availability":
       return {
-        text:`Unit masih tersedia, tapi lagi banyak yang tanya 👀`,
+        text:`Unit masih ada, tapi jujur sekarang lagi banyak yang tanya 👀`,
         urgency:true
       };
 
     default:
       return {
-        text:`Saya bantu carikan yang paling cocok ya 😊 Lagi fokus di area mana atau budget berapa?`
+        text:`Aku bantu carikan yang paling cocok ya 😊
+
+Kamu lagi fokus di lokasi atau budget dulu?`
       };
   }
 }
@@ -2223,7 +2265,8 @@ let lastAIMessageTime = 0;
 function safeAddAI(text){
 
   const now = Date.now();
-
+  // ⛔ jangan kirim kalau user lagi ngetik / aktif
+  if(Date.now() - userActivity.lastTime < 5000) return;
   // ⛔ minimal 8 detik antar AI message
   if(now - lastAIMessageTime < 8000) return;
 
@@ -2236,29 +2279,32 @@ function smartFollowUp(){
 
   const idle = Date.now() - userActivity.lastTime;
 
-  // ❌ kalau user baru aktif → jangan ganggu
-  if(idle < 15000) return;
+  if(idle < 20000) return;
 
-  // 🔹 Level 1 (soft)
-  if(idle > 20000 && userActivity.interestLevel < 2){
-    safeAddAI("Masih cari-cari atau mau saya bantu pilihkan yang paling cocok? 😊");
+  switch(userFunnel.step){
+
+    case "cold":
+      safeAddAI("Lagi cari rumah di area mana? Aku bantu carikan yang paling cocok 😊");
+      break;
+
+    case "explore":
+      safeAddAI("Kalau dari lokasi tadi, aku ada beberapa opsi yang lebih worth it 👀 Mau aku kirim?");
+      break;
+
+    case "compare":
+      safeAddAI("Dari beberapa opsi tadi, kamu lebih condong ke harga atau cicilan ringan?");
+      break;
+
+    case "hot":
+      safeAddAI("Kalau kamu sempat, weekend ini bagus buat survey 👍 Biar langsung kebayang unitnya");
+      break;
+
+    case "closing":
+      safeAddAI("Kalau cocok, biasanya orang langsung amankan unit dulu biar gak keambil 🙌");
+      showCTA();
+      break;
   }
 
-  // 🔹 Level 2 (mid)
-  else if(idle > 40000 && userActivity.lastProject){
-    safeAddAI(
-      `Unit ${userActivity.lastProject.name} ini banyak diminati loh 👀`
-    );
-  }
-
-  // 🔹 Level 3 (closing)
-  else if(idle > 70000 && userActivity.interestLevel > 2){
-    safeAddAI(
-      "Kalau mau, saya bisa bantu amankan unit dulu sebelum keambil 🙌"
-    );
-
-    showCTA();
-  }
 }
 
 function triggerSoftUrgency(){
@@ -2293,6 +2339,7 @@ function fakeAI(q){
   const reply = smartReply(intent, results, q);
   
   addMsg(reply.text, "bot");
+  updateFunnel(intent);
   
   // show card kalau relevan
   if(reply.showCard && results.length){
@@ -2405,9 +2452,10 @@ function fakeAI(q){
 window.addEventListener("load",()=>{
   startAutoFollowUp();
 
-  // trigger first soft AI
   setTimeout(()=>{
-    addMessage("ai","Halo 👋 Lagi cari rumah di area mana?");
+    addMessage("ai",
+      "Halo 👋 Lagi cari rumah untuk ditempati atau investasi?"
+    );
   },2000);
 });
 
@@ -2925,8 +2973,7 @@ function smartBuyerNotif(){
 
   if(!userActivity.lastProject) return;
 
-  const names = ["Andi","Rina","Budi","Dina","Fajar","Sinta"];
-  const cities = ["Jakarta","Depok","Bogor","Bekasi","Tangerang"];
+  if(userFunnel.step !== "hot" && userFunnel.step !== "closing") return;
 
   const name = names[Math.floor(Math.random()*names.length)];
   const city = cities[Math.floor(Math.random()*cities.length)];
@@ -2936,16 +2983,15 @@ function smartBuyerNotif(){
   updateIsland({
     icon:"🔥",
     title:`${name} • ${city}`,
-    desc:`sedang cek ${project}`,
+    desc:`lagi proses ${project}`,
     action:""
   });
 
-  // 🔥 AI ikut ngomong
   setTimeout(()=>{
-    addMessage("ai",
-      `Barusan ada ${name} dari ${city} juga lagi lihat ${project} 👀`
+    safeAddAI(
+      `${name} dari ${city} barusan tanya unit ${project} juga 👀`
     );
-  },1200);
+  },1500);
 }
 
 setInterval(()=>{
