@@ -5,7 +5,7 @@
 
     "price": "Mulai 3 Jutaan",
     "priceValue": 630000000,
-
+    "type": "Cluster Premium",
     "status": "ready",
     
     "badge": {
@@ -46,7 +46,7 @@
 
     "price": "Mulai 2 Jutaan",
     "priceValue": 490000000,
-
+    "type": "Cluster Premium",
     "status": "ready",
     
     "badge": {
