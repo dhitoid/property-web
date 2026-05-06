@@ -2127,6 +2127,26 @@ function findProjectByKeyword(query){
   );
 }
 
+function addMessage(type, text){
+  addMsg(text, type === "ai" ? "bot" : "user");
+}
+
+function hideTyping(){
+  removeTyping();
+}
+
+function pushIsland(data){
+  updateIsland(data);
+}
+
+function islandState(type){
+  return {
+    icon:"✨",
+    title:"Info",
+    desc:type
+  };
+}
+
 function formatRupiah(num){
   return "Rp " + num.toLocaleString("id-ID");
 }
@@ -2616,39 +2636,17 @@ function addMsg(text, type, options = {}){
 /* ===== SEND ===== */
 function sendMessage(){
 
-  const input = document.getElementById("chatInput");
-  const text = input.value;
+  const inputEl = document.getElementById("chatInput");
+  const text = inputEl.value;
 
   if(!text) return;
 
-  addMessage("user", text);
+  addMsg(text, "user");
   islandSync("typing");
 
-  setTimeout(()=>{
-    hideTyping();
-    addMessage("ai", reply);
-  
-    islandSync("reply");
-  
-  },1200);
+  fakeAI(text); // 🔥 langsung pakai ini aja
 
-  const intent = detectIntent(text);
-
-  setTimeout(()=>{
-    showTyping();
-
-    setTimeout(()=>{
-      hideTyping();
-
-      addMessage("ai", getAIReply(intent));
-
-      startFollowUp();
-
-    },1200);
-
-  },300);
-
-  input.value = "";
+  inputEl.value = "";
 }
 
 const voiceBtn = document.getElementById("voiceBtn");
