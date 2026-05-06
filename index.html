@@ -213,7 +213,10 @@ nav{
   display:flex;
   justify-content:space-between;
   align-items:center;
-  padding:14px 22px;
+  padding:
+    calc(14px + env(safe-area-inset-top))
+    22px
+    14px;
   background:rgba(0,0,0,.55);
   backdrop-filter:var(--blur);
   border-bottom:1px solid rgba(255,255,255,.08);
@@ -1453,22 +1456,22 @@ gap:20px;
 }
 
 /* ===== ULTRA IOS ISLAND ===== */
-/* ===== ISLAND BASE ===== */
 .island{
   position:fixed;
   top:14px;
   left:50%;
   transform:translateX(-50%);
   z-index:9999;
+  pointer-events:none;
 }
 
 /* WRAP */
 .island-wrap{
   background:#000;
   border-radius:50px;
-  height:36px;
-  width:120px;
-
+  height:32px;
+  width:110px;
+  pointer-events:auto;
   display:flex;
   align-items:center;
   justify-content:center;
@@ -2755,7 +2758,7 @@ function renderProjects(type="all"){
       ` : ""}
 
       <div class="card-status">
-        ${(p.status || "ready").toUpperCase()}
+        ${p.type || "Project"}
       </div>
 
       <div class="card-content">
