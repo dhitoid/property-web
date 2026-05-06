@@ -2118,6 +2118,13 @@ let userMemory = {
   lastSeen: null
 };
 
+let userActivity = {
+  lastProject: null,
+  lastAction: null,
+  lastTime: Date.now(),
+  interestLevel: 0
+};
+
 function findProjectByKeyword(query){
   query = query.toLowerCase();
 
@@ -2204,6 +2211,7 @@ function fakeAI(q){
 
       return;
     }
+    
 
     /* ================= FINANCE ================= */
     if(intent === "finance"){
@@ -2249,6 +2257,22 @@ function fakeAI(q){
       results.forEach(addProjectCard);
       return;
     }
+    
+    if(results.length && userActivity.interestLevel > 2){
+
+  setTimeout(()=>{
+    addMsg(
+      "Kalau serius, unit ini bisa saya bantu lock hari ini 👍",
+      "bot",
+      {
+        cta:{
+          label:"Amankan Sekarang",
+          link:"https://wa.me/6281802168184"
+        }
+      }
+    );
+  }, 1500);
+}
 
     /* ================= FALLBACK ================= */
     addMsg(
@@ -2258,6 +2282,15 @@ function fakeAI(q){
 
   }, 800);
 }
+
+window.addEventListener("load",()=>{
+  startAutoFollowUp();
+
+  // trigger first soft AI
+  setTimeout(()=>{
+    addMessage("ai","Halo 👋 Lagi cari rumah di area mana?");
+  },2000);
+});
 
 // function speak(text){
   //const utter = new SpeechSynthesisUtterance(text);
@@ -2433,27 +2466,38 @@ function getAIReply(intent){
 
 let followTimer;
 
-function startFollowUp(){
+function startAutoFollowUp(){
 
   clearTimeout(followTimer);
 
   followTimer = setTimeout(()=>{
 
-    if(userMemory.interest){
+    const idleTime = Date.now() - userActivity.lastTime;
 
+    // 🔥 LEVEL 1 (soft nudge)
+    if(idleTime > 20000){
       addMessage("ai",
-        `By the way, unit ${userMemory.interest} lagi banyak diminati loh 👀`
+        "Masih cari-cari atau sudah ada yang cocok? 😊"
       );
-
-    }else{
-
-      addMessage("ai",
-        `Aku bisa bantu rekomendasikan unit terbaik buat kamu 😊`
-      );
-
     }
 
-  }, 60000); // 15 detik idle
+    // 🔥 LEVEL 2 (urgency)
+    if(idleTime > 40000 && userActivity.lastProject){
+      addMessage("ai",
+        `Unit ${userActivity.lastProject.name} lagi banyak yang tanya loh 👀`
+      );
+    }
+
+    // 🔥 LEVEL 3 (push closing)
+    if(idleTime > 60000){
+      addMessage("ai",
+        "Kalau mau, aku bisa bantu amankan unit dulu sebelum keambil 🙌"
+      );
+
+      showCTA();
+    }
+
+  }, 15000);
 }
 
 function showCTA(){
@@ -2658,15 +2702,15 @@ function addMsg(text, type, options = {}){
 function sendMessage(){
   const input = document.getElementById("aiInput"); // ✅ FIX
   const text = input.value.trim();
+  
+  userActivity.lastAction = "chat";
+  userActivity.interestLevel += 1;
 
   if(!text) return;
 
   addMsg(text, "user");
-
   islandSync("typing");
-
   fakeAI(text); // 🔥 langsung pakai ini aja (hapus logic double)
-
   input.value = "";
 }
 
@@ -2779,26 +2823,42 @@ function showIsland(state){
 const names = ["Andi","Rina","Budi","Dina","Fajar","Sinta"];
 const cities = ["Jakarta","Depok","Bogor","Bekasi","Tangerang"];
 
-function fakeBuyer(){
+function smartBuyerNotif(){
+
+  if(!userActivity.lastProject) return;
+
+  const names = ["Andi","Rina","Budi","Dina","Fajar","Sinta"];
+  const cities = ["Jakarta","Depok","Bogor","Bekasi","Tangerang"];
 
   const name = names[Math.floor(Math.random()*names.length)];
   const city = cities[Math.floor(Math.random()*cities.length)];
 
+  const project = userActivity.lastProject.name;
+
   updateIsland({
-    icon:"👤",
+    icon:"🔥",
     title:`${name} • ${city}`,
-    desc:"sedang melihat unit ini",
+    desc:`sedang cek ${project}`,
     action:""
   });
 
+  // 🔥 AI ikut ngomong
   setTimeout(()=>{
-    island.classList.remove("active");
-  },2600);
+    addMessage("ai",
+      `Barusan ada ${name} dari ${city} juga lagi lihat ${project} 👀`
+    );
+  },1200);
 }
 
 setInterval(()=>{
 
   const rand = Math.random();
+
+  // 🔥 kalau user lagi high interest → kasih tekanan
+  if(userActivity.interestLevel > 3){
+    smartBuyerNotif();
+    return;
+  }
 
   if(rand < 0.4){
     showIsland("promo");
@@ -2807,10 +2867,10 @@ setInterval(()=>{
     showIsland("activity");
   }
   else{
-    fakeBuyer();
+    smartBuyerNotif();
   }
 
-}, 9000);
+}, 10000);
 
 document.addEventListener("click",(e)=>{
   if(e.target.closest(".project-card")){
@@ -2846,6 +2906,13 @@ document.addEventListener("scroll",()=>{
   );
 });
 
+document.querySelectorAll('a[href*="wa.me"]').forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    userActivity.lastAction = "click_wa";
+    userActivity.interestLevel += 3;
+  });
+});
+
 
 /* =========================
    MODAL OPEN (UPGRADED)
@@ -2853,6 +2920,11 @@ document.addEventListener("scroll",()=>{
 function openModal(i){
   const p = projects[i];
   currentProject = p;
+  
+  userActivity.lastProject = p;
+  userActivity.lastAction = "view_project";
+  userActivity.lastTime = Date.now();
+  userActivity.interestLevel += 2;
   
   const aiPanel = document.getElementById("aiPanel");
   if(aiPanel){
