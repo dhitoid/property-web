@@ -2742,7 +2742,7 @@ function renderProjects(type="all"){
   const filtered =
   type === "all"
     ? projects
-    : projects.filter(p => (p.type || "").toLowerCase() === type.toLowerCase());
+    : projects.filter(p => (p.mame || "").toLowerCase() === type.toLowerCase());
 
   filtered.forEach((p,i)=>{
 
