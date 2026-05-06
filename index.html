@@ -1775,6 +1775,56 @@ gap:20px;
   transform:scale(.96);
 }
 
+.msg{
+  max-width:80%;
+  padding:10px 14px;
+  border-radius:16px;
+  font-size:13px;
+  line-height:1.4;
+  animation:fadeIn .25s ease;
+}
+
+/* BOT */
+.msg.bot{
+  background:#f2f2f7;
+  color:#000;
+  border-bottom-left-radius:6px;
+}
+
+/* USER */
+.msg.user{
+  background:#007aff;
+  color:#fff;
+  margin-left:auto;
+  border-bottom-right-radius:6px;
+}
+
+/* TEXT */
+.msg-text{
+  margin-bottom:6px;
+}
+
+/* CTA BUTTON */
+.msg-cta{
+  display:inline-block;
+  margin-top:6px;
+  padding:8px 12px;
+  border-radius:10px;
+
+  font-size:12px;
+  font-weight:600;
+
+  background:#007aff;
+  color:#fff;
+  text-decoration:none;
+
+  transition:.2s;
+}
+
+.msg-cta:active{
+  transform:scale(.96);
+}
+
 </style>
 </head>
 
@@ -2106,52 +2156,89 @@ function fakeAI(q){
 
     removeTyping();
 
-    let res = "Saya bantu ya 😊";
+    const intent  = detectIntent(q);
+    const results = filterProjects(q);
 
-    const project = findProjectByKeyword(q);
+    /* =========================
+       HOT LEAD
+    ========================= */
+    if(intent === "hot"){
+      addMsg("🔥 Wah cocok nih, unitnya lagi tersedia!", "bot");
 
-    /* ===== DETECT INTENT ===== */
+      if(results.length){
+        results.forEach(addProjectCard);
+      }
 
-    if(project){
-      res =
-`Saya rekomendasikan:
+      addMsg(
+        "Mau saya bantu amankan unit atau langsung hubungkan ke admin?",
+        "bot",
+        {
+          cta:{
+            label:"Chat WhatsApp Sekarang",
+            link:"https://wa.me/6281802168184"
+          }
+        }
+      );
 
-🏡 ${project.name}
-📍 ${project.location}
-💰 ${project.price}
-
-Mau saya bantu hitung cicilan atau jadwalkan survey?`;
+      speak("Unit ini masih tersedia, saya bisa bantu lanjutkan ke admin");
+      return;
     }
 
-    else if(q.includes("harga")){
-      const random = projects[Math.floor(Math.random()*projects.length)];
+    /* =========================
+       FINANCE
+    ========================= */
+    if(intent === "finance"){
+      addMsg("Saya bantu hitung cicilan ya 😊", "bot");
 
-      res =
-`Contoh unit:
+      if(results.length){
+        addProjectCard(results[0]);
+      }
 
-🏡 ${random.name}
-📍 ${random.location}
-💰 ${random.price}
+      addMsg("Mau saya hitungkan simulasi cicilan lengkap?", "bot");
 
-Budget kamu berapa? saya carikan yang paling cocok 🔥`;
+      speak("Saya bisa bantu hitung cicilan untuk kamu");
+      return;
     }
 
-    else if(q.includes("dp")){
-      res = "Sekarang ada promo TANPA DP + free semua biaya 🔥";
+    /* =========================
+       VISIT
+    ========================= */
+    if(intent === "visit"){
+      addMsg("Kita bisa jadwalkan survey langsung ke lokasi 👍", "bot");
+
+      if(results.length){
+        results.forEach(addProjectCard);
+      }
+
+      addMsg(
+        "Kapan mau survey? Saya bantu booking jadwal.",
+        "bot",
+        {
+          cta:{
+            label:"Booking Survey via WhatsApp",
+            link:"https://wa.me/6281802168184"
+          }
+        }
+      );
+
+      speak("Kita bisa jadwalkan survey ke lokasi");
+      return;
     }
 
-    else if(q.includes("lokasi")){
-      const areas = [...new Set(projects.map(p=>p.location))];
-      res = "Area tersedia: \n" + areas.join(", ");
+    /* =========================
+       NORMAL
+    ========================= */
+    if(results.length){
+      addMsg("Saya temukan beberapa yang cocok 👇","bot");
+      results.forEach(addProjectCard);
+      speak("Saya menemukan beberapa rumah yang cocok");
+      return;
     }
 
-    else{
-      res = "Saya bisa bantu carikan rumah sesuai budget & lokasi kamu 😊";
-    }
-
+    /* FALLBACK */
+    const res = "Saya bisa bantu carikan rumah sesuai kebutuhan kamu 😊";
     addMsg(res,"bot");
-
-    speak(res); // 🔊 voice reply
+    speak(res);
 
   },1000);
 }
@@ -2508,8 +2595,9 @@ function addMsg(text, type, options = {}){
   const textEl = document.createElement("div");
   textEl.className = "msg-text";
   textEl.innerText = text;
+
   el.appendChild(textEl);
-  
+
   /* CTA (optional) */
   if(options.cta){
     const cta = document.createElement("a");
@@ -2517,6 +2605,7 @@ function addMsg(text, type, options = {}){
     cta.innerText = options.cta.label;
     cta.href = options.cta.link;
     cta.target = "_blank";
+
     el.appendChild(cta);
   }
 
