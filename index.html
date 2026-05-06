@@ -1463,6 +1463,14 @@ gap:20px;
   transform:translateX(-50%);
   z-index:9999;
   pointer-events:none;
+  transition:
+    transform .45s cubic-bezier(.22,.61,.36,1),
+    opacity .35s ease;
+}
+
+.island.hide{
+  transform:translate(-50%, -20px);
+  opacity:0;
 }
 
 /* WRAP */
@@ -1958,9 +1966,9 @@ gap:20px;
   <h2>Project Rumah</h2>
   <div class="project-filter">
   <button class="filter-btn active" data-filter="all">Semua</button>
-  <button class="filter-btn" data-filter="ready">Ready</button>
-  <button class="filter-btn" data-filter="booking">Booking</button>
-  <button class="filter-btn" data-filter="sold">Sold</button>
+  <button class="filter-btn" data-filter="Grand Pakis Residence">Grand Pakis Residence</button>
+  <button class="filter-btn" data-filter="Grand Duta Pakis">Grand Duta Pakis</button>
+  <button class="filter-btn" data-filter="Nara Pakis Residence">Nara Pakis Residence</button>
 </div>
   <div id="projectGrid" class="project-grid"></div>
 </section>
@@ -2732,9 +2740,9 @@ function renderProjects(type="all"){
   grid.innerHTML = "";
 
   const filtered =
-    type === "all"
-      ? projects
-      : projects.filter(p => (p.status || "ready") === type);
+  type === "all"
+    ? projects
+    : projects.filter(p => (p.type || "").toLowerCase() === type.toLowerCase());
 
   filtered.forEach((p,i)=>{
 
@@ -3696,6 +3704,22 @@ function generateSchema(){
   script.text = JSON.stringify(schema);
   document.head.appendChild(script);
 }
+
+let lastScrollIsland = window.scrollY;
+
+window.addEventListener("scroll", () => {
+  const current = window.scrollY;
+
+  if(current > lastScrollIsland && current > 60){
+    // scroll turun → hide
+    island.classList.add("hide");
+  } else {
+    // scroll naik → show
+    island.classList.remove("hide");
+  }
+
+  lastScrollIsland = current;
+});
 
 window.addEventListener("scroll",()=>{
   const currentY = window.scrollY;
