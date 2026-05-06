@@ -2735,14 +2735,16 @@ fetch("projects.json")
     generateSchema();
   });
 
-function renderProjects(type="all"){
+function renderProjects(filter="all"){
   const grid = document.getElementById("projectGrid");
   grid.innerHTML = "";
 
   const filtered =
-  type === "all"
-    ? projects
-    : projects.filter(p => (p.mame || "").toLowerCase() === type.toLowerCase());
+    filter === "all"
+      ? projects
+      : projects.filter(p =>
+          p.name.toLowerCase() === filter.toLowerCase()
+        );
 
   filtered.forEach((p,i)=>{
 
@@ -2766,7 +2768,7 @@ function renderProjects(type="all"){
       ` : ""}
 
       <div class="card-status">
-        ${p.type || "Project"}
+        ${p.status || "ready"}
       </div>
 
       <div class="card-content">
