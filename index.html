@@ -3489,26 +3489,16 @@ function initFullscreenSwipe(type){
   track.onpointercancel = track.onpointerup;
 }
 
+/* ================= PROJECT FILTER LOGIC ================= */
 const filterButtons = document.querySelectorAll(".filter-btn");
 
-filterButtons.forEach(btn => {
-  btn.addEventListener("click", () => {
-    filterButtons.forEach(b => b.classList.remove("active"));
+filterButtons.forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    filterButtons.forEach(b=>b.classList.remove("active"));
     btn.classList.add("active");
 
     const type = btn.dataset.filter;
-
-    let filtered;
-
-    if (type === "all") {
-      filtered = projects;
-    } else {
-      filtered = projects.filter(p =>
-        p.name.toLowerCase().trim() === type.toLowerCase().trim()
-      );
-    }
-
-    renderProjects(filtered); // ✅ sekarang kirim array
+    renderProjects(type); // 🔥 pakai render yang sama
   });
 });
 
