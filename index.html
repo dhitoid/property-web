@@ -2426,20 +2426,6 @@ function fakeAI(q){
   },700);
 }
 
-  setTimeout(()=>{
-    addMsg(
-      "Kalau serius, unit ini bisa saya bantu lock hari ini 👍",
-      "bot",
-      {
-        cta:{
-          label:"Amankan Sekarang",
-          link:"https://wa.me/6281802168184"
-        }
-      }
-    );
-  }, 1500);
-}
-
 window.addEventListener("load",()=>{
   startAutoFollowUp();
 
@@ -2450,16 +2436,16 @@ window.addEventListener("load",()=>{
   },2000);
 });
 
-// function speak(text){
-  //const utter = new SpeechSynthesisUtterance(text);
+function speak(text){
+  const utter = new SpeechSynthesisUtterance(text);
 
-  //utter.lang = "id-ID";
-  //utter.rate = 1;
-  //utter.pitch = 1;
+  utter.lang = "id-ID";
+  utter.rate = 1;
+  utter.pitch = 1;
 
-  //speechSynthesis.cancel(); // stop sebelumnya
-  //speechSynthesis.speak(utter);
-//}
+  speechSynthesis.cancel(); // stop sebelumnya
+  speechSynthesis.speak(utter);
+}
 
 function extractBudget(text){
   const match = text.match(/(\d+)\s?(jt|juta|m)/i);
