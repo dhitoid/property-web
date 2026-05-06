@@ -1864,25 +1864,67 @@ gap:20px;
   transform:scale(.96);
 }
 
-.project-search{
-  margin:16px 0 10px;
+.project-topbar{
+  position:sticky;
+  top:70px;
+  z-index:30;
+
+  padding:12px;
+  border-radius:16px;
+
+  background:rgba(0,0,0,.45);
+  backdrop-filter:blur(14px);
+
+  display:flex;
+  flex-direction:column;
+  gap:10px;
 }
 
-.project-search input{
+/* SEARCH */
+.search-box input{
   width:100%;
   padding:12px 16px;
-  border-radius:12px;
+  border-radius:999px;
 
   border:1px solid rgba(255,255,255,.15);
   background:rgba(255,255,255,.08);
   color:#fff;
-
-  outline:none;
   font-size:14px;
+  outline:none;
 }
 
-.project-search input::placeholder{
-  color:rgba(255,255,255,.5);
+/* FILTER SCROLL */
+.filter-scroll{
+  display:flex;
+  gap:8px;
+  overflow-x:auto;
+  flex-wrap:nowrap;
+}
+
+.filter-scroll::-webkit-scrollbar{
+  display:none;
+}
+
+.filter-chip{
+  flex:0 0 auto;
+
+  padding:8px 14px;
+  border-radius:999px;
+
+  font-size:12px;
+  color:#fff;
+
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.15);
+
+  cursor:pointer;
+  transition:.25s;
+}
+
+.filter-chip.active{
+  background:#fff;
+  color:#000;
+  font-weight:600;
 }
 
 </style>
@@ -2011,7 +2053,7 @@ gap:20px;
   </div>
 </section>
 
-<section id="project">
+<!-- <section id="project">
   <h2>My Project</h2>
     <div class="project-search">
     <input type="text" id="projectSearch" placeholder="Cari project...">
@@ -2025,6 +2067,33 @@ gap:20px;
   <button class="filter-btn" data-filter="Cluster Lily">Cluster Lily</button>
   <button class="filter-btn" data-filter="Ruko 2 Lantai">Ruko 2 Lantai</button>
 </div>
+  <div id="projectGrid" class="project-grid"></div>
+</section> -->
+
+<section id="project">
+  <h2>My Project</h2>
+
+  <!-- 🔥 COMBINED SEARCH + FILTER -->
+  <div class="project-topbar">
+
+    <!-- SEARCH -->
+    <div class="search-box">
+      <input type="text" id="projectSearch" placeholder="Cari project, lokasi, harga...">
+    </div>
+
+    <!-- FILTER CHIP SCROLL -->
+    <div class="filter-scroll">
+      <button class="filter-chip active" data-filter="all">Semua</button>
+      <button class="filter-chip" data-filter="Grand Pakis Residence">Grand Pakis Residence</button>
+      <button class="filter-chip" data-filter="Grand Duta Pakis">Grand Duta Pakis</button>
+      <button class="filter-chip" data-filter="Nara Pakis Residence">Nara Pakis Residence</button>
+      <button class="filter-chip" data-filter="Cluster Gardenia">Cluster Gardenia</button>
+      <button class="filter-chip" data-filter="Cluster Lily">Cluster Lily</button>
+      <button class="filter-chip" data-filter="Ruko 2 Lantai">Ruko 2 Lantai</button>
+    </div>
+
+  </div>
+
   <div id="projectGrid" class="project-grid"></div>
 </section>
 
@@ -3122,22 +3191,98 @@ document.querySelectorAll('a[href*="wa.me"]').forEach(btn=>{
   });
 });
 
-document.getElementById("projectSearch").addEventListener("input",(e)=>{
-  const val = e.target.value.toLowerCase();
+function renderFilteredProjects(list){
+  const grid = document.getElementById("projectGrid");
+  grid.innerHTML = "";
 
-  // reset filter active
-  document.querySelectorAll(".filter-btn")
-    .forEach(b=>b.classList.remove("active"));
+  if(!list.length){
+    grid.innerHTML = `<p style="opacity:.6">Project tidak ditemukan 😢</p>`;
+    return;
+  }
 
-  document.querySelector('[data-filter="all"]')
-    .classList.add("active");
+  list.forEach((p,i)=>{
 
-  const filtered = projects.filter(p =>
-    p.name.toLowerCase().includes(val)
-  );
+    const cover = p.media?.[0]
+      ? (p.media[0].startsWith("http")
+          ? p.media[0]
+          : p.folder + p.media[0])
+      : "";
 
-  renderFilteredProjects(filtered);
+    const card = document.createElement("div");
+    card.className = "project-card";
+
+    card.innerHTML = `
+      <div class="project-cover"
+           style="background-image:url('${cover}')"></div>
+
+      <div class="card-content">
+        <div class="card-location">📍 ${p.location}</div>
+        <div class="card-title">${p.name}</div>
+        <div class="card-price">${p.price}</div>
+      </div>
+    `;
+
+    card.onclick = ()=> openModal(projects.indexOf(p));
+    grid.appendChild(card);
+  });
+}
+
+let activeFilter = "all";
+let searchQuery  = "";
+
+/* 🔍 SEARCH */
+document.getElementById("projectSearch")
+.addEventListener("input",(e)=>{
+  searchQuery = e.target.value.toLowerCase();
+  applyCombinedFilter();
 });
+
+/* 🎯 FILTER */
+document.querySelectorAll(".filter-chip")
+.forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    document.querySelectorAll(".filter-chip")
+      .forEach(b=>b.classList.remove("active"));
+
+    btn.classList.add("active");
+
+    activeFilter = btn.dataset.filter.toLowerCase();
+
+    // auto scroll tengah
+    btn.scrollIntoView({
+      behavior:"smooth",
+      inline:"center"
+    });
+
+    applyCombinedFilter();
+  });
+});
+
+/* 🔥 COMBINED FILTER ENGINE */
+function applyCombinedFilter(){
+
+  const result = projects.filter(p=>{
+
+    const name = p.name.toLowerCase();
+    const loc  = p.location.toLowerCase();
+    const type = (p.type || "").toLowerCase();
+
+    const matchSearch =
+      name.includes(searchQuery) ||
+      loc.includes(searchQuery) ||
+      type.includes(searchQuery);
+
+    const matchFilter =
+      activeFilter === "all" ||
+      name.includes(activeFilter) ||
+      loc.includes(activeFilter) ||
+      type.includes(activeFilter);
+
+    return matchSearch && matchFilter;
+  });
+
+  renderFilteredProjects(result);
+}
 
 /* =========================
    MODAL OPEN (UPGRADED)
