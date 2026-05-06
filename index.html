@@ -2205,25 +2205,29 @@ function removeTyping(){
   if(el) el.remove();
 }
 
-function smartReply(intent, results){
+function smartReply(intent, results, q){
 
-  const p = results?.[0];
+  const p = results?.[0] || chatContext.lastProject;
 
   switch(intent){
 
     case "location":
       return {
-        text:`Ada di ${p?.location || "area strategis"} 👍 Dekat akses BSD & Puspitek.
+        text:`Lokasinya di ${p?.location || "area strategis"} 👍
 
-Kamu cari yang lebih ke akses kerja atau lingkungan nyaman?`,
+Akses ke BSD & Puspitek deket banget.
+
+Biasanya kamu kerja / aktivitas di area mana? Biar aku sesuaikan 👀`,
         showCard:true
       };
 
     case "price":
       return {
-        text:`Range harga mulai ${p?.price || "500 jutaan"} 💰
+        text:`Harga mulai ${p?.price || "500 jutaan"} 💰
 
-Kalau budget kamu di berapa? Biar aku filterin yang paling pas 👌`,
+Menariknya ini bisa tanpa DP & free biaya.
+
+Budget kamu kisaran berapa? Aku bantu cariin yang paling worth it 👌`,
         showCard:true
       };
 
@@ -2231,31 +2235,55 @@ Kalau budget kamu di berapa? Biar aku filterin yang paling pas 👌`,
       return {
         text:`Cicilan mulai ±3 jutaan/bulan 😍
 
-Kalau aku bantu hitungin sesuai kondisi kamu, mau DP berapa kira-kira?`,
+Kalau aku bantu hitung lebih detail, kamu prefer DP kecil atau cicilan ringan?`,
         showCard:true
       };
 
     case "visit":
       return {
-        text:`Boleh banget 👍
+        text:`Mantap 👍
 
-Biasanya yang sudah lihat langsung lebih yakin.
+Biasanya yang sudah survey langsung lebih yakin karena bisa lihat lingkungan & akses.
 
-Mau aku bantu booking slot weekend ini?`,
+Weekend ini aku ada slot kosong, mau aku bookingin?`,
         cta:true
       };
 
-    case "availability":
+    case "closing":
       return {
-        text:`Unit masih ada, tapi jujur sekarang lagi banyak yang tanya 👀`,
-        urgency:true
+        text:`Siap 👍
+
+Unit yang ini lagi cukup cepat pergerakannya.
+
+Aku bisa bantu amankan dulu biar gak keambil, nanti kamu tinggal survey santai 🙌`,
+        cta:true
+      };
+
+    case "trust":
+      return {
+        text:`Aman 👍
+
+Legalitas lengkap (SHM/IMB), dan sudah banyak yang ambil unit di sini.
+
+Kalau mau, aku bisa jelasin detailnya biar makin yakin 👌`
+      };
+
+    case "compare":
+      return {
+        text:`Kalau dibandingkan, biasanya orang pilih dari:
+
+1️⃣ Lokasi (akses kerja)
+2️⃣ Harga / cicilan
+3️⃣ Lingkungan
+
+Kamu lebih prioritas ke yang mana?`
       };
 
     default:
       return {
         text:`Aku bantu carikan yang paling cocok ya 😊
 
-Kamu lagi fokus di lokasi atau budget dulu?`
+Kamu lagi fokus ke budget, lokasi, atau cicilan dulu?`
       };
   }
 }
@@ -2331,100 +2359,72 @@ function fakeAI(q){
 
   setTimeout(()=>{
 
-  removeTyping();
+    removeTyping();
 
-  const intent  = detectIntent(q);
-  const results = filterProjects(q);
-  
-  const reply = smartReply(intent, results, q);
-  
-  addMsg(reply.text, "bot");
-  updateFunnel(intent);
-  
-  // show card kalau relevan
-  if(reply.showCard && results.length){
-    addProjectCard(results[0]);
-  }
-  
-  // CTA hanya kalau intent kuat
-  if(reply.cta){
-    showCTA();
-  }
-  
-  // urgency hanya kalau user sudah engage
-  if(reply.urgency && userActivity.interestLevel > 2){
-    triggerSoftUrgency();
-  }
-  
-    /* ================= HOT LEAD ================= */
-    if(intent === "hot"){
-      addMsg("🔥 Wah ini cocok banget buat kamu!", "bot");
+    const intent  = detectIntent(q);
+    const results = filterProjects(q);
 
-      if(results.length){
-        results.forEach(addProjectCard);
-      }
-
-      addMsg(
-        "Unit ini lagi banyak diminati. Mau saya bantu amankan sekarang?",
-        "bot",
-        {
-          cta:{
-            label:"Amankan via WhatsApp",
-            link:generateWA(results[0]?.name || "rumah")
-          }
-        }
-      );
-
-      return;
+    // update context
+    chatContext.lastIntent = intent;
+    if(results.length){
+      chatContext.lastProject = results[0];
     }
-    
 
-    /* ================= FINANCE ================= */
-    if(intent === "finance"){
-      addMsg("Siap, saya bantu hitung cicilan ya 💰", "bot");
+    const reply = smartReply(intent, results, q);
 
-      if(results.length){
-        addProjectCard(results[0]);
+    addMsg(reply.text, "bot");
+
+    updateFunnel(intent);
+
+    // 🔥 SHOW CARD
+    if(reply.showCard && results.length){
+      addProjectCard(results[0]);
+    }
+
+    // 🔥 SOFT PERSONALIZATION
+    if(!userMemory.name){
+      const nameMatch = q.match(/nama\s?saya\s?(\w+)/i);
+      if(nameMatch){
+        userMemory.name = nameMatch[1];
+        addMsg(`Siap ${userMemory.name}, aku bantu ya 😊`, "bot");
       }
+    }
 
+    // 🔥 CTA LOGIC (SMART)
+    if(
+      intent === "closing" ||
+      userFunnel.step === "closing" ||
+      userActivity.interestLevel > 4
+    ){
+      showCTA();
+    }
+
+    // 🔥 AUTO PUSH (HIGH INTEREST)
+    if(userActivity.interestLevel > 5 && results.length){
+      setTimeout(()=>{
+        addMsg(
+          "Kalau kamu serius, unit ini bisa aku bantu lock hari ini 👍",
+          "bot",
+          {
+            cta:{
+              label:"Amankan Sekarang",
+              link:generateWA(results[0]?.name)
+            }
+          }
+        );
+      },1500);
+    }
+
+    // 🔥 FALLBACK HUMAN STYLE
+    if(!results.length){
       addMsg(
-        "Mau saya hitungkan simulasi cicilan lengkap + DP ringan?",
+        "Boleh lebih spesifik sedikit? Misalnya: 'rumah 500 juta di BSD tanpa DP' 😊",
         "bot"
       );
-
-      return;
     }
 
-    /* ================= VISIT ================= */
-    if(intent === "visit"){
-      addMsg("Kita bisa jadwalkan survey langsung 👍", "bot");
-
-      if(results.length){
-        results.forEach(addProjectCard);
-      }
-
-      addMsg(
-        "Weekend ini ada slot kosong. Mau Sabtu atau Minggu?",
-        "bot",
-        {
-          cta:{
-            label:"Booking Survey",
-            link:generateWA("Survey lokasi")
-          }
-        }
-      );
-
-      return;
-    }
-
-    /* ================= BROWSE ================= */
-    if(results.length){
-      addMsg("Ini beberapa yang sesuai dengan kebutuhan kamu 👇","bot");
-      results.forEach(addProjectCard);
-      return;
-    }
-    
-    if(results.length && userActivity.interestLevel > 2){
+  },700);
+}
 
   setTimeout(()=>{
     addMsg(
@@ -2573,15 +2573,35 @@ function addProjectCard(p){
   };
 }
 
+let chatContext = {
+  lastIntent: null,
+  lastProject: null,
+  lastTopic: null
+};
+
 function detectIntent(text){
   text = text.toLowerCase();
 
-  if(/(lokasi|dimana|area|dekat)/.test(text)) return "location";
-  if(/(harga|berapa|price|jt|juta|m)/.test(text)) return "price";
-  if(/(cicilan|kpr|angsuran)/.test(text)) return "cicilan";
-  if(/(survey|lihat|kunjungi)/.test(text)) return "visit";
-  if(/(promo|diskon|bonus)/.test(text)) return "promo";
-  if(/(tersedia|ready|masih ada)/.test(text)) return "availability";
+  // 🔥 HIGH INTENT (closing signal)
+  if(/(ambil|booking|amankan|deal|fix|mau beli)/.test(text)) return "closing";
+
+  // 🔥 VISIT STRONG
+  if(/(survey|lihat lokasi|kunjungi|datang)/.test(text)) return "visit";
+
+  // 🔥 FINANCE
+  if(/(cicilan|kpr|angsuran|dp)/.test(text)) return "cicilan";
+
+  // 🔥 PRICE
+  if(/(harga|berapa|budget|jt|juta|m)/.test(text)) return "price";
+
+  // 🔥 LOCATION
+  if(/(lokasi|dimana|area|dekat|bsd|serpong|pamulang)/.test(text)) return "location";
+
+  // 🔥 TRUST / DOUBT
+  if(/(aman|legal|surat|sertifikat)/.test(text)) return "trust";
+
+  // 🔥 COMPARISON
+  if(/(bagus mana|lebih bagus|banding)/.test(text)) return "compare";
 
   return "general";
 }
